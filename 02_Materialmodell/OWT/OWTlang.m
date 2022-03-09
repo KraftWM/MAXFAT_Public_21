@@ -1,0 +1,528 @@
+function [ZVARneu] = OWTlang(desig, ZVAR, para, epara)
+%
+% (O)hno (W)ang (T)anaka für pseudo Stress approach nach Asatz 
+% von Lang
+%
+% !!!!!!!!!! Nur Spannungssteuerung im ESZ
+%
+% kinematische Verfestigung:
+% Aus Ohno et al. 1993 KINEMATIC HARDENING RULES WITH CRITICAL
+% STATE OF DYNAMIC RECOVERY, PART I
+%
+% nichtproportionale Verfestigung:
+% Vorbild aus Döring mit Tanaka Parameter
+% 
+%
+% Implentierung nach Döring
+%
+%   INPUT:
+%    desig      -> Inkrement in pseudo spannungen
+%    ZVAR       -> Zustandsvariablen
+%    para       -> Parameter des Pseudo Modells und des Materialmodells
+%    epara      -> "
+%
+%   OUTPUT:
+%    ZVARneu    -> neue zustandsvariablen nach Lastinkrement
+%__________________________________________________________________________
+%
+% Zustandsvariablen:
+% Zuerst Zustandsvariablen des Struckturmodells (wie bei Spannungssteuerung)
+% dann zusätzliche Variablen des Materialmodells 
+% ZVAR = [eeps    -> Pseudo Dehnungen (! nicht pseudo elastische Dehnungen)
+%         epsp    -> "reale" Plastische Dehnungen 
+%         ealphai -> pseudo Backstress
+%         p       -> "reale" plastische Bogenlänge
+%         eQ      -> Zusätzlicher Radius FF für NPV für Strukturmodell
+%         ebeta   -> (Backstraintensor) Mittelpunkt Gedächtnisfläche im
+%                    Dehnungsraum für Strukturmodell
+%         eq      -> Radius Dehnungsgedächtnisfläche für Strukturmodell
+%         eA      -> Nichtproportionaalitätskennwert für Strukturmodell
+%         eCT     -> Nichtproportionalitätstensor nach Tanaka für Strukturmodell
+%         alphai  -> "reale" Backstresstensoren
+%         Q      -> Zusätzlicher Radius FF für NPV 
+%         beta   -> (Backstraintensor) Mittelpunkt Gedächtnisfläche im
+%                    Dehnungsraum 
+%         q      -> Radius Dehnungsgedächtnisfläche
+%         A      -> Nichtproportionaalitätskennwert
+%         CT     -> Nichtproportionalitätstensor nach Tanaka
+%
+%
+% Anzahl an Zustandsvariabeln =  (5+2*M+ntens)*ntens+7 
+%
+% Darstellung von Tensoren
+%         sig11              eps11
+%  sig =  sig22       eps =  eps22
+%         sig12             2eps12
+%
+%__________________________________________________________________________          
+%
+%
+% Parameter:
+% zuerst Material- dann Struckturmodell 
+%     para = [E, nu,  c_i,  r_i,  chi_i,  gamma,  gamma_np,  gamma_a,  gamma_c,  Qnpmax,  eta,  omega,  cg,  r0,...
+%     epara = [E, nu, ec_i, er_i, echi_i, egamma, egamma_np, egamma_a, egamma_c, eQnpmax, eeta, eomega, ecg, er0]
+%       M = (length(para)-11)/3;
+%       eM = (length(epara)-11)/3;
+%   
+%
+%__________________________________________________________________________          
+%
+%    NOTATIONEN:
+%    Spannungen                 Verzerrungen
+%
+%           sig_11                     eps_11
+%    sig =  sig_22               eps = eps_22
+%           sig_12                     2eps_12
+%
+%    Tanaka Tensor
+%     -> Symmetrischer Tensor 4. Stufe (Dehnungscharakter)
+%     -> (num Komponenten = ntens*(ntens+1)/2
+%     -> Speicherrichtung entlang der Diagonalen
+%   Tensorkomp. in Voigt Notation       Für Zustandsvariablen
+%        ( 1111   1122  2*1112  )       ( 1  4  6)
+% CT =   (        2222  2*2212  )   =   (    2  5)
+%        (              4*1212  )       (       3)
+%
+%  ----------------------------------------------------------------------
+% |  Autor: Jan Kraft 2019 Tu Darmstadt FG Werkstoffmechanik             |
+% |  Stand: Juni 2021                                                    |
+%  ----------------------------------------------------------------------
+
+% -------------------------------------------------------------------------
+% !!!!! AKTUELL NUR ESZ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% -------------------------------------------------------------------------
+ntens = 3;
+ndi = 2;
+
+
+
+%--------------------------------------------------------------------------
+%                  Materialparamter ermitteln                                  
+%--------------------------------------------------------------------------
+
+% Anzahl Backstress
+% M = (length(para)-20)/6; % TODO
+M = (length(para)-11)/3;
+eM = (length(epara)-11)/3;
+% Elastizitätskonstanten
+E = para(1);
+nu = para(2);
+er0 = epara(eM*3 + 11);
+
+%--------------------------------------------------------------------------
+%                        Hilfsmatrizen                                    
+%--------------------------------------------------------------------------
+
+% statische Matrizen
+[P, P_line] = set_maps(ntens,ndi);
+% Steifigkeit
+CEL = elast_steifigkeit(E,nu,ntens,ndi);
+% Nachgiebigkeit
+DEL = elast_nachgiebigkeit(E,nu,ntens,ndi);
+
+%--------------------------------------------------------------------------
+%                  Zustandsvariablen auslesen (nur relevante)                                
+%--------------------------------------------------------------------------
+
+% pseudo gesamtdehnung 
+eeps =  ZVAR(1:ntens);
+% plastische dehnung
+epsp = ZVAR(ntens+1:2*ntens);
+% Pseudo (elastische9 Spannungen
+esig = CEL * (eeps - epsp);
+% pseudo backstress
+ealphai = reshape(ZVAR(2*ntens+1:(eM+2)*ntens),ntens,eM);
+% Zusatzradius
+eQ = ZVAR((2+eM)*ntens+2);
+% Radius Strukturmodell
+er = er0 + eQ;
+
+
+%--------------------------------------------------------------------------
+%                       Elastischer Trial Step
+%--------------------------------------------------------------------------
+
+es = P * esig;                                                             % Pseudo Spannungsdeviator
+ea = sum(ealphai,2);                                                       % Pseudo Gesamtbackstress
+des = P * desig;                                                           % Inkrement Pseudo Spannungsdeviator
+es_tr = es + des;                                                          % Pseudo Versuchsspannungsdeviator
+ebeta = es_tr - ea;                                                        % Pseudo effektive Spannung
+F_tr = ebeta' * P_line * ebeta - 2/3 * er^2;                               % Pseudo Überspannung
+FTOL = 1e-7;                                                               % Toleranz für Abweichungen F ~= 0
+
+
+%--------------------------------------------------------------------------
+%                   Trial Step wird angenommen
+%--------------------------------------------------------------------------
+
+if F_tr < FTOL   % Trial step völlig elastische
+    
+    % Updaten der pseudo gesamtdehnung
+    eeps = eeps + DEL * desig;      
+    % Updaten Zustandsvariablen
+    ZVARneu = [eeps;ZVAR(ntens+1:end)];
+
+%--------------------------------------------------------------------------
+%                   Trial Step wird abgelehnt
+%-------------------------------------------------------------------------- 
+
+else % Ermittle elastischen Anteil xel
+    
+    % 1. ermittle elastischen Anteil
+%     xel = elastink(s,a,r0,ds,ndi);
+    xel = elastink2(es,ea,P_line,er,des,FTOL);
+    
+    % 2. ausführen elastischen Teil
+    eeps = eeps + DEL * (xel*desig);                                       % Pseudo Dehnungen
+    ZVAR(1:ntens) = eeps;
+    
+    % 3. plastischer Teil des inkrements
+    desig = (1-xel)*desig;
+    
+    % Integration je nach Spannungszustand
+    options = [];
+    if ntens == 6 % 3D
+        
+        msg = 'nicht implementiert';
+        error(msg)
+                    
+    elseif ntens == 3 && ndi == 2 % ESZ
+
+        % statische Matrizen
+        [P, P_line, P_hat, A, P_check] = set_maps(ntens,ndi);
+        
+        % Integration
+        
+        % matlab Version
+%         [~,ZVARneu] = rk87(@materialmodellESZ,[0,1], ZVAR, options, desig,...
+%                         para, epara, CEL, DEL,P, P_line, P_hat, A, P_check);
+
+        % Mex Version
+        [~,ZVARneu] = rk87(@CoderVersion_OWT_ESZ_Lang_mex,[0,1], ZVAR, options, M, eM, desig,...
+                        para, epara, CEL, DEL,P, P_line, P_hat, A, P_check);
+    
+    elseif ntens == 2 && ndi == 1 % sigma-tau
+        
+        msg = 'nicht implementiert';
+        error(msg)
+                    
+    elseif ntens == 1 % 1D
+        
+        msg = 'nicht implementiert';
+        error(msg)
+                    
+    end
+    
+    % nur letzten Schritt ausgeben
+    ZVARneu = ZVARneu(end,:)'; 
+        
+    
+end % Ende Unterscheidung Trial Step
+end % Ende Hauptfunktion
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                  Modellgleichungen Ebener Spannungszustand             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function dZVAR = ...
+          materialmodellESZ(~, ZVAR, desig, para, epara, CEL, DEL, ...
+                            P, P_line, P_hat, A, P_check)
+% Konkretes Materialmodell für ESZ und Ansatz nach Lang
+%
+%   INPUT:
+%      ~       -> Zeit wird hier nicht gebraucht, aber wird von ode solver
+%                 benötigt
+%     X        -> aktueller Zustand
+%  para        -> Material- und Struckturparameter
+%  desig       -> inkrement des pseudospannungstensors
+% CEL,DEL      -> Elastische Steifigkeit und Nachgiebigkeit   
+% P, P_line... -> Diverse Abbildungen
+%
+%   OUTPUT:
+%         dX -> Inkremente der Zustandsvariablen
+%  ----------------------------------------------------------------------
+% |  Autor: Jan Kraft 2019 Tu Darmstadt FG Werkstoffmechanik             |
+%  ----------------------------------------------------------------------
+
+
+%--------------------------------------------------------------------------
+%                   Materialparameter
+%--------------------------------------------------------------------------
+
+% Zuweisen der Materialparameter
+ntens = 3;                                                                 % Tensorkomponenten
+M = (length(para)-11)/3;
+eM = (length(epara)-11)/3;
+
+% Materialmodell
+% kinematische Verfestigung
+c_i = para(3:2+M);
+r_i = para(3+M:2+2*M);
+chi_i = para(3+2*M:2+3*M);
+% NP Verfestigung
+gamma = para(3+3*M);
+gamma_np = para(4+3*M);
+gamma_a = para(5+3*M);
+gamma_c = para(6+3*M);
+Qnpmax = para(7+3*M);
+eta = para(8+3*M);
+omega = para(9+3*M);
+cg = para(10+3*M);
+
+% Strukturmodell
+% kinematische Verfestigung
+ec_i = epara(3:2+eM);
+er_i = epara(3+eM:2+2*eM);
+echi_i = epara(3+2*eM:2+3*eM);
+% NP Verfestigung
+egamma = epara(3+3*eM);
+egamma_np = epara(4+3*eM);
+egamma_a = epara(5+3*eM);
+egamma_c = epara(6+3*eM);
+eQnpmax = epara(7+3*eM);
+eeta = epara(8+3*eM);
+eomega = epara(9+3*eM);
+ecg = epara(10+3*eM);
+% Radius FF
+er0 = epara(11+3*eM);
+
+% oft verwendete Konstanden
+w3d2 = sqrt(3/2);
+delta = 1e-40;                                                             % numerisch 0
+
+%--------------------------------------------------------------------------
+%                   Zustandsvariablen
+%--------------------------------------------------------------------------
+
+% Pseudo Dehnungen (! nicht pseudo elastische Dehnungen)
+eeps = ZVAR(1:ntens);
+% "reale" Plastische Dehnungen 
+epsp = ZVAR(ntens+1:2*ntens);
+% pseudo spannungen 
+esig = CEL * (eeps - epsp);
+% pseudo Backstress
+ealphai = reshape(ZVAR(2*ntens+1 : (eM+2)*ntens),ntens,eM);
+% "reale" plastische Bogenlänge
+p = ZVAR((eM+2)*ntens + 1);
+% Zusätzlicher Radius FF für NPV für Strukturmodell
+eQ = ZVAR((eM+2)*ntens + 2);
+% (Backstraintensor) Mittelpunkt Gedächtnisfläche im Dehnungsraum für Strukturmodell
+ebeta = ZVAR((2+eM)*ntens+3:(3+eM)*ntens+2);
+% Radius Dehnungsgedächtnisfläche für Strukturmodell
+eq = ZVAR((3+eM)*ntens+3);
+% Nichtproportionaalitätskennwert für Strukturmodell
+eANP = ZVAR((3+eM)*ntens+4);
+% Nichtproportionalitätstensor nach Tanaka für Strukturmodell
+eCT = ZVAR((3+eM)*ntens+5 : (3+eM+(ntens+1)/2)*ntens+4);
+% "reale" Backstresstensoren
+alphai = reshape( ZVAR( (3+eM+(ntens+1)/2)*ntens+5 : (3+eM+M+(ntens+1)/2)*ntens+4 ),ntens,M);
+% Zusätzlicher Radius FF für NPV 
+Q = ZVAR((3+eM+M+(ntens+1)/2)*ntens+5);
+% (Backstraintensor) Mittelpunkt Gedächtnisfläche im Dehnungsraum 
+beta = ZVAR((3+eM+M+(ntens+1)/2)*ntens+6:(4+eM+M+(ntens+1)/2)*ntens+5);
+% Radius Dehnungsgedächtnisfläche
+q = ZVAR((4+eM+M+(ntens+1)/2)*ntens+6);
+% Nichtproportionaalitätskennwert
+ANP = ZVAR((4+eM+M+(ntens+1)/2)*ntens+7);
+% Nichtproportionalitätstensor nach Tanaka
+CT = ZVAR((4+eM+M+(ntens+1)/2)*ntens+8 : (4+eM+M+(ntens+1))*ntens+7);
+
+% -------------------------------------------------------------------------
+%                        Radius der Fließfläche
+% -------------------------------------------------------------------------
+er = er0 + eQ;
+
+
+%--------------------------------------------------------------------------
+%                   Normale an die Fließfläche
+%--------------------------------------------------------------------------
+
+% Spannungsdeviator
+es = P * esig;
+% Backstress
+ea = sum(ealphai,2);
+% normale an Fließfläche
+en = (w3d2/er).* P_hat * (es-ea);
+transen = en.';
+
+
+%--------------------------------------------------------------------------
+%                   Ableitung der Teilbackstresstensoren
+%--------------------------------------------------------------------------
+
+% Normen der Teilbackstresstensoren
+norm_ai = sqrt( sum( (P_line*alphai) .* alphai ) );
+norm_ai(norm_ai == 0) = delta;                                             % Abfangen von 0
+
+% normen der pseudo teilbackstresstensoren
+norm_eai = sqrt( sum( (P_line * ealphai) .* ealphai ) );
+norm_eai(norm_eai == 0) = delta;
+
+% hilfsgrößen
+Li = alphai./norm_ai;
+eLi = ealphai./norm_eai;
+
+% weitere hilfsgrößen ( !!!! IMPLEMENTIERUNG DER SCHLEIFE SCHEINT SCHNELLER
+% ZU SEIN !!!! )
+var1 = c_i .* r_i;
+evar1 = ec_i .* er_i;
+var2 = A * en;
+var3 = norm_ai./r_i;
+var3(var3>1) = 1;
+evar3 = norm_eai./er_i;
+evar3(evar3>1) = 1;
+var4 = transen * P_check * Li;
+var4 = 0.5 * (var4 + abs(var4));
+evar4 = transen * P_check * eLi;
+evar4 = 0.5 * (evar4 + abs(evar4));
+
+% Schleife über alle Backstresstensoren
+% init ableitungen
+dealphai_dp = zeros(ntens,M);
+dalphai_dp = zeros(ntens,M);
+for ii = 1 : M
+    
+    % backstress
+    dalphai_dp(:,ii) = var1(ii) * (var2 - (var3(ii)).^(chi_i(ii)+1).*var4(ii).*Li(:,ii));
+    
+end
+for ii = 1 : eM
+    
+    % pseudo backstress
+    dealphai_dp(:,ii) = evar1(ii) * ( var2 - (evar3(ii)).^(echi_i(ii)+1).*evar4(ii).*eLi(:,ii) );
+    
+end
+
+% Ableitung gesamter pseudo backstress
+dea_dp = sum(dealphai_dp,2);
+
+% -------------------------------------------------------------------------
+%                   Gedächtnissfläche
+% -------------------------------------------------------------------------
+% Effektive plastische Dehnung
+effs = epsp-beta;
+norm2es = effs'*(A*P_check)*effs;
+
+% Effektive plastische Dehnung Strukturmodell
+eeffs = epsp-ebeta;
+norm2ees = eeffs'*(A*P_check)*eeffs;
+
+% Gedächtnissfläche
+g = norm2es - q^2;
+
+% Gedächtnissfläche Strukturmodell
+eg = norm2ees - eq^2;
+
+% Hilfsvariable ( H(g) )
+Hg = 0.5 * (sign(g) + 1);
+Heg = 0.5 * (sign(eg) + 1);
+
+% Normale an die gedächtnissfläche
+if norm2es == 0
+    norm2es = delta;
+end
+
+if Hg == 0 
+    % ... ||n*|| < 1
+%     ng = effstrain./sqrt(norm2es);
+    ng = effs./q;%effstrain./sqrt(norm2es);
+    dqdp = - (cg * q)^omega; 
+else
+    % ... ||n*|| = 1
+    if norm2es > delta
+        ng = effs./sqrt(norm2es);
+    else
+        ng = en;
+    end
+    dqdp = eta;
+end
+
+% Normale an die gedächtnissfläche Strukturmodell
+if norm2ees == 0
+    norm2ees = delta;
+end
+
+if Heg == 0 
+    % ... ||n*|| < 1
+%     ng = effstrain./sqrt(norm2es);
+    neg = eeffs./eq;
+    deqdp = - (ecg * eq)^eomega; 
+else
+    % ... ||n*|| = 1
+    if norm2ees > delta
+        neg = eeffs./sqrt(norm2ees);
+    else
+        neg = en;
+    end
+    deqdp = eeta;
+end
+
+% Hilfsvariabel <ne:n>
+nn = transen * (A*P_check) * ng;
+nn = 0.5 * (nn + abs(nn));
+nen = transen * (A*P_check) * neg;
+nen = 0.5 * (nen + abs(nen));
+
+% Isotrope Verfestigung
+dqdp = dqdp*nn;
+deqdp = deqdp*nen;
+
+% Kinematische Verfestigung
+dbetadp = (1-eta) * Hg * nn * ng;
+debetadp = (1-eeta) * Heg * nen * neg;
+
+% -------------------------------------------------------------------------
+%                   Nichtproportionale Verfestigung
+% -------------------------------------------------------------------------
+Qnpinf = Qnpmax * (1 - exp(- gamma_np * q));
+Qnp = ANP*Qnpinf;
+dQdp = gamma * ( Qnp - Q );
+
+eQnpinf = eQnpmax * (1 - exp(- egamma_np * eq));
+eQnp = eANP*eQnpinf;
+deQdp = egamma * ( eQnp - eQ );
+
+
+
+%--------------------------------------------------------------------------
+%                   plastischer Tangentenmodul
+%--------------------------------------------------------------------------
+
+eh = transen * P_check * dea_dp + sqrt(2/3) * deQdp;
+
+%--------------------------------------------------------------------------
+%                   inkremente plastische bogenlänge
+%--------------------------------------------------------------------------
+
+dp = (1/eh) * (transen * desig); 
+
+%--------------------------------------------------------------------------
+%                   inkremente der zustandsvariablen
+%--------------------------------------------------------------------------
+
+% Materialmodell
+depsp= dp .* en;
+dalphai = dalphai_dp .* dp;
+dQ = dQdp * dp;
+dq = dqdp * dp;
+dbeta = dbetadp * dp;
+[dANP,dCT] = inkTanaka(ntens,ANP,CT,en,gamma_a,gamma_c,dp);
+
+% Strukturmodell
+deeps = depsp + DEL * desig;
+dealphai = dealphai_dp .* dp;
+deQ = deQdp * dp;
+deq = deqdp * dp;
+debeta = debetadp * dp;
+[deANP,deCT] = inkTanaka(ntens,eANP,eCT,en,egamma_a,egamma_c,dp);
+
+%--------------------------------------------------------------------------
+%                   Zusammenfassen der Inkremente
+%--------------------------------------------------------------------------
+
+
+dZVAR = [deeps; depsp; reshape(dealphai,ntens*eM,1);dp;deQ;debeta;deq;deANP;deCT;...
+                       reshape(dalphai,ntens*M,1);    dQ; dbeta; dq; dANP; dCT];   
+
+end % Ende Modell ESZ
