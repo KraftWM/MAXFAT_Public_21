@@ -11,6 +11,10 @@ function [phic,psic,DLc,DL] = criticalplaneV5(...
 % Funktion zum durchführen der kritischen Ebenen Schleife und
 % Schädigungsrechnung
 %
+% Version benutzt Rainflowzählung aus "rainflowV3.m".
+% Zuerst werden die Umkehrpunkte gefiltert dann werden nur die Umkehrpunkte
+% gezählt. 
+%
 % -------------------------------------------------------------------------
 % INPUT:
 % Lokale Spannungen Dehnungen

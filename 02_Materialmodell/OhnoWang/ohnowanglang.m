@@ -10,13 +10,13 @@ function [ZVARneu] = ohnowanglang(desig,ZVAR,para,epara)
 %       Lang et al       - A multiaxial stress-strain correction scheme
 %
 % INPUT:
-%  dESIG -> Inkrement in pseudo spannungen
+%  dESIG -> Inkrement in pseudo Spannungen
 %  ZVAR  -> Zustandsvariablen
 %  para  -> Parameter des Materialmodells
 % epara  -> Parameter des Strukturmodells
 %
 % OUTPUT:
-%  ZVARneu -> neuer zustand nach inkrement
+%  ZVARneu -> neuer Zustand nach Inkrement
 %
 %__________________________________________________________________________
 %

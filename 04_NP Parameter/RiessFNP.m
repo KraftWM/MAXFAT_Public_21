@@ -1,6 +1,7 @@
 function [FNP] = RiessFNP(sig)
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
+% Aus Masterarbeit Andreas Kern
 
 %--------------------------------------------------------------------------
 %                       Eingabedaten überprüfen

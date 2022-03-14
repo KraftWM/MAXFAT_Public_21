@@ -1,8 +1,11 @@
 function [Kg,ng] = GleitungRambergOsgood(Ks,ns,hyp)
-% Schätzt zyklische Kurve für Gleitungen aus zyklischer Kurve für Dehnungen
+% Schätzt zyklische Kurve für Gleitungen aus zyklischer Kurve fuer Dehnungen
 % nach verschiedenen Hypothesen.
 % Ks,ns      - Parameter Ramberg Osgood für Dehnungen
 % hyp        - Vergleichshypothese
+%            1 - Mises
+%            2 - Tresca
+%            3 - Max. Hauptdehnung (varargin = nu)
 % -------------------------------------------------------------------------
 
 % Exponent 

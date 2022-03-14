@@ -6,12 +6,12 @@ function KPR = RauheitseinflussFKM(wsgruppe,Rz,Rm)
 %                          2 = Guss
 %                          3 = Aluknet
 %                          4 = Aluguss
-%                          5 = Höchstfester Stahl
+%                          5 = Hoechstfester Stahl
 % Rz       - Rauheit in Mikrometer 
 % Rm       - Zugefestigkeit in MPa
 % -------------------------------------------------------------------------
 
-% Abfangen glatte Oberfläche
+% Abfangen glatte Oberflaeche
 if Rz == 0
     KPR = 1;
     return;
@@ -27,18 +27,18 @@ elseif any(wsgruppe == 2) || strcmp(wsgruppe,'Stahlguss')
     brp = 0.42;
     RmNmin = 400;
 elseif any(wsgruppe == 4) || strcmp(wsgruppe,'Aluguss')
-    msg = 'Falsche Werstoffgrupppe übergeben, Rechnung wird abgebrochen';
+    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
     error(msg)  
 elseif any(wsgruppe == 3) || strcmp(wsgruppe,'Aluknet')
     arp = 0.27;
     brp = 0.43;
     RmNmin = 133;
-elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Höchstfester Stahl')
+elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Hoechstfester Stahl')
     arp = 0.27;
     brp = 0.43;
     RmNmin = 400; 
 else
-    msg = 'Falsche Werstoffgrupppe übergeben, Rechnung wird abgebrochen';
+    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
     error(msg)    
 end 
 

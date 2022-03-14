@@ -12,7 +12,7 @@ function [SUBDATA,In,Jn,Kn] = CutOutHyst2(DATA,I,J,K,Nf)
 % SUBDATA  - Ausgeschnittene Hysteres
 % In,Jn,Kn - Neue Indices der Umkehrpunkte
 %__________________________________________________________________________
-% Reserviere Speicher für Subdata (Annahme: Hysteresen kleiner als 10001
+% Reserviere Speicher fuer Subdata (Annahme: Hysteresen kleiner als 10001
 % Datenpunkte)
 S = zeros(1,10000);
 % ... Startwert Leseindex in Data
@@ -32,9 +32,9 @@ while i ~= K
     % ... Inkrementiere Leseindex Data
     i = Nf(i);    
 end % Ende Schleife
-% K dazufügen
+% K dazufuegen
 S(s) = i;
-% ... lösche Nullen
+% ... loesche Nullen
 S(S==0) = [];
 % Ausgeschnittener Datenteil
 SUBDATA = DATA(:,S); 

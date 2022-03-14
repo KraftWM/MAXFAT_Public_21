@@ -23,11 +23,12 @@ classdef Kerbsimulation < handle
 %                       varargin     - variabler Input
 %                       'VarName1',var1,'VarName2',var2,...)
 %
-%  Es gibt eine Eingaben, die mindestens nötig sind um die Kerbsimulation
-%  zu definieren. Für alle PUBLIC EIGENSCHAFTEN kann auch der Variablenname
+%  Es gibt Eingaben, die mindestens nötig sind um die Kerbsimulation
+%  zu definieren, siehe oben. 
+%  Für alle PUBLIC EIGENSCHAFTEN kann auch der Variablenname
 %  und anschließend der Variablenwert übergeben werden. Die PUBLIC 
-%  EIGENSCHAFTEN können auch nach definition noch geändert werden. Das ist
-%  ziemlich leicht über die Set-Methode der handle Klasse möglich
+%  EIGENSCHAFTEN können auch nach Definition noch geändert werden. Das ist
+%  über die Set-Methode der handle Klasse möglich
 %    
 %__________________________________________________________________________
 %
@@ -42,19 +43,18 @@ classdef Kerbsimulation < handle
 %                  "KarimOhno" 
 %                  "OhnoWang" (default)
 %                  "Jiang"
+%                  "OWT"
 %   
-%   optpara    -> Optionen zum Bestimmen der Materialparameter (wahl der
-%                 stützstellen in plastischen dehnungen)
+% optpara,eoptpara -> Optionen zum Bestimmen der Material- & 
+%                 Strukturparameter (wahl der stützstellen in plastischen 
+%                                    Dehnungen)
 %                   1 - äquidistant in Spannungen
 %                   2 - geometrische reihe
-%                   3 - verfahren simon (default)
-%                Parameter werden im Kontruktor immer automatische bestimmt
-%                bei selbstvorgabe müssen diese nach dem Kontruktor per
-%                hand geändert werden, siehe "r02paraV2.m"
+%                   3 - verfahren simon moser (default)
 %    
 %   verfahren  -> Name des Näherungsverfahrens (string)
 %
-%                 Struckturfließflächen:
+%                 Strukturfließflächen:
 %
 %                 "PseudoStress"
 %                 "PseudoStress Lang" -> (default) Pseudo Stress aber schneller
@@ -115,9 +115,12 @@ classdef Kerbsimulation < handle
 %                 optpara = 3 -> q = Anteil plastischer Dehnungen 
 %                                            an gesamtdehnung bei
 %                                            Fließbegin
+%    eq        -> zum bestimmen der Strukturparameter, siehe q
 %  ep_M        -> zum bestimmen der Materialparameter (nur bei optpara = 3)
 %                 plastische dehunung nach der ideale plastizität gilt
 %
+%  eep_M       -> zum bestimmen der Strukturparameter(nur bei eoptpara = 3)
+%                 plastische dehunung nach der ideale plastizität gilt
 %   para       -> Parameter des Plastizitätsmodells (in PUBLIC damit sie 
 %                 auch selbst gesetzt werden können)
 %   epara      -> Parameter des Strukturmodells (in PUBLIC damit sie 
@@ -219,7 +222,7 @@ classdef Kerbsimulation < handle
       eep_M {mustBeNumeric} = 0.03;                                        % plastische Dehnung nach der ideale plasti herrscht
       
       % Zusätzliche Bauteilinformationen (Für Strukturfließflächenansätze)
-      fk {mustBeNumeric} = NaN; 
+      fk {mustBeNumeric} = NaN;                                            % Werkstofffließkurve
       bfk {mustBeNumeric} = NaN;                                           % Bauteilfließkurve
       Kp {mustBeNumeric} = NaN;                                            % Traglastformzahl
 	  
@@ -562,9 +565,12 @@ classdef Kerbsimulation < handle
          
         % ... checkt optionen für Parameter bestimmung
         function checkParaOpt(obj)
-            % Prüft Input zum bestimmen der Material- und 
-            % Strukturparameter
-            %
+            % Prüft Input zum bestimmen der Strukturparameter
+            % Falls nicht explizit ein Verfahren zum bestimmen der
+            % Strukutrparameter angegeben wird, wird das gleiche Verfahren
+            % wie für das Materialmodell verwendet.
+            % 
+            %  
             % -------------------------------------------------------------
             
             % ... Prüfe Strukturparameter
@@ -574,7 +580,7 @@ classdef Kerbsimulation < handle
                 obj.eq = obj.q;
                 if obj.eoptpara == 1
                     obj.eq = 1.6 * obj.q;
-                end               
+                end
             end
         end % ende checken parameterbestimmung
     end % Ende Set & Get protected

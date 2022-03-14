@@ -1,15 +1,15 @@
 function write_RAINFLOW(jobname,namenszusatz,outpath,P,phi,psi)
-% Schreibe Ergebnisse der Rainflowzählung und Schädigungsbewertung
-% (ausrechnen von Schädigungsparametern) in eine Datei
+% Schreibe Ergebnisse der Rainflowzaehlung und Schaedigungsbewertung
+% (ausrechnen von Schaedigungsparametern) in eine *.hcm Datei
 %
 % INPUT:
 % jobname      - (str) Name der Rechnung
-% namenszusatz - (str) zusätzlicher Name
+% namenszusatz - (str) zusaetzlicher Name
 % outpath   - (str) Pfad zu OutputFolder
-% dmgmodel  - (int) Unterscheide Schädigungsmodelle
-% P         - (struct) Ergebnisse der rainflowzählung (teilweise
-%             abhängig von dmgmodel) Feldname = name des
-%             Schädigungsparameters
+% dmgmodel  - (int) Unterscheide Schaedigungsmodelle
+% P         - (struct) Ergebnisse der rainflowzaehlung (teilweise
+%             abhaengig von dmgmodel) Feldname = name des
+%             Schaedigungsparameters
 % phi,psi   - (double) Aktuell betrachtete Ebene (in rad) 
 %
 % OUTPUT:
@@ -24,10 +24,10 @@ psi = psi * 180/pi;
 dateiname = [jobname,'_',namenszusatz,'_',num2str(phi),'_',num2str(psi),'.hcm'];
 name = [outpath,'\',dateiname];
 
-% ... Öffne Datei
+% ... oeffne Datei
 fid = fopen(name,'w');
 
-% ... def header und Format fürs Speichern von P
+% ... def header und Format fuers Speichern von P
 if size(P,1) == 4
     header = [' Mode  ',...
               ' Schwingspiel ',...

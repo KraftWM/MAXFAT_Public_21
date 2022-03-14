@@ -1,6 +1,6 @@
 function [esig,eepsp] = uniax_neuberstern(E,sig,epsp,Kprime,nprime,Kp)
-% einachsiger neuber mit Sternterm aus Richtlinie Nichtlinear
-% !!!!!  zur ermittlung von BAUTEILFLIEßKURVEN !!!!!
+% einachsiger Neuber mit Sternterm aus Richtlinie Nichtlinear
+% !!!!!  zur Ermittlung von BAUTEILFLIEßKURVEN !!!!!
 %
 % INPUT:
 % E             -> Emodul

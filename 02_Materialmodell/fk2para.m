@@ -7,7 +7,7 @@ function para = fk2para(sig, epsp, E, nu, r0, chi_i, M, modell)
 % INPUT:
 % sig    -> Stützstellen Spannungen
 % epsp   -> Stützstellen Dehnungen
-% E,nu   -> elastizitätskonstanten
+% E,nu   -> Elastizitätskonstanten
 %  r0    -> Fließspannung
 % chi_i  -> Rat. para
 %  M     -> Anzahl Backstress

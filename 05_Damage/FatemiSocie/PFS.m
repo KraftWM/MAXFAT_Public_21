@@ -22,7 +22,7 @@ classdef PFS < handle
 % EIGENSCHAFTEN:
 % Public:
 %      cc          - counting channel, Zeiger auf die Zeile in Spannungen
-%                    und dehnungen die mit HCM gezählt wird
+%                    und Dehnungen die mit HCM gezählt wird
 %                            cc = 12 gamma_xz (Mode II an Punkt A)
 %                    default cc = 10 gamma_xy (Mode III an Punkt A)
 % pwlopt           - option zum bestimmen der P-Wöhlerlinie
@@ -58,8 +58,8 @@ classdef PFS < handle
 % FUNKTIONEN:
 % Normal:
 %   pfs             -> berechnet Schädigungsparameter
-%   rainflow        -> rainflowzählung mit hcm
-%   hcm             -> hcm zählung 
+%   rainflow        -> Rainflowzählung mit hcm
+%   hcm             -> hcm Zählung 
 %   lebendauer      -> berechnet Lebensdauer
 %   damage_akk      -> Schadensakkumulation
 % 

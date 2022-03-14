@@ -1,6 +1,7 @@
 function [FNP] = IQR_FNP(sig)
 %UNTITLED7 Summary of this function goes here
 %   Detailed explanation goes here
+% Aus Masterarbeit Andreas Kern
 
 %--------------------------------------------------------------------------
 %                       Eingabedaten überprüfen

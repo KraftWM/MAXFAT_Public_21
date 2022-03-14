@@ -3,15 +3,15 @@ function [ZVAR1,EZVAR1] = ...
                           ZVAR0,EZVAR0, para, epara,esigpath, ...
                           ntens, ndi, material, numink, M,eM,...
                           Outfile)
-% Funktion führt Pseudo Stress Approach nach Kötten/Barkey/Socie mit dem
-% Algo. von Lang et al. aus
+% Funktion führt Pseudo Stress Approach nach Köttgen/Barkey/Socie mit dem
+% Algo. von Lang et al. 
 %
 % AKTUELL NUR FÜR ESZ 
 %
 % INPUT:
-%  ZVAR0, EZVAR0 -> Startwerte der zustandsvariabel (schon richtig
+%  ZVAR0, EZVAR0 -> Startwerte der Zustandsvariabel (schon richtig
 %                   aufbereitet)
-%  para,epara    -> Parameter für mat und str modell
+%  para,epara    -> Parameter für Mat.- und Str.-modell
 % esigpath       -> Verweiß auf Datei mit verlauf der lokalen pseudo
 %                   Spannungen
 % ntens, ndi     -> beschreiben Spannungszustand

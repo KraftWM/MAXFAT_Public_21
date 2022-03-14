@@ -6,7 +6,7 @@ function [RESULTS,DLc,phic,psic,Totaltime] = schadensrechnung_kerb(jobname,outpa
                                     optcritplane,...
                                     optrainflow,...
                                     optallhcm)
-% Hauptfunktion zum ausführen der Schädigungsrechnung für Kerben
+% Hauptfunktion zum ausfuehren der Schaedigungsrechnung fuer Kerben
 %
 % BERECHNUNGSABLAUF:
 %
@@ -16,13 +16,13 @@ function [RESULTS,DLc,phic,psic,Totaltime] = schadensrechnung_kerb(jobname,outpa
 %
 % Kritische Ebenen Schleife      - Transformation lokaler Spannungen und
 %                                  Dehnungen in verschiede Schnittebenen 
-%                                  und Schädigungsrechnng in den
+%                                  und Schaedigungsrechnng in den
 %                                  Schnittebenen
 %
-% Rainflow (HCM)                 - Zyklenzählen in den verschiedenen Ebenen
+% Rainflow (HCM)                 - Zyklenzaehlen in den verschiedenen Ebenen
 %
-% Schädigungsrechnung            - Sobald eine Hystere schließt wird direkt
-%                                  ein Schädigungsparameter berechnet
+% Schaedigungsrechnung            - Sobald eine Hystere schließt wird direkt
+%                                  ein Schaedigungsparameter berechnet
 %
 % -------------------------------------------------------------------------
 %
@@ -35,11 +35,11 @@ function [RESULTS,DLc,phic,psic,Totaltime] = schadensrechnung_kerb(jobname,outpa
 % KERBSIMU         - (obj, der Klasse Kerbsimulation) Definiert Ablauf 
 %                    der Kerbsimulation
 %
-% 4. Schädigung
-% DMGs             - (cell array mit Objekten von Schädigungsparametern)
+% 4. Schaedigung
+% DMGs             - (cell array mit Objekten von Schaedigungsparametern)
 %
 % 5. kritische Ebene 
-% winkel           - (double array), Winkel für kritische Ebenen Schleife
+% winkel           - (double array), Winkel fuer kritische Ebenen Schleife
 %                    in Grad
 %                    phimax = winkel(1);
 %                    phimin = winkel(2);
@@ -52,17 +52,17 @@ function [RESULTS,DLc,phic,psic,Totaltime] = schadensrechnung_kerb(jobname,outpa
 % optdisplay       - Anzeige auf dem Display
 % optcritplane     - Ausgabe der Ergebnisse ALLER Ebenen in
 %                               Datei
-% optrainflow      - Schreibe Ergebnisse der Rainflowzählung in
+% optrainflow      - Schreibe Ergebnisse der Rainflowzaehlung in
 %                               eine Datei
-% optallhcm        - Schreibe Ergebnisse der Rainflowzählung in
+% optallhcm        - Schreibe Ergebnisse der Rainflowzaehlung in
 %                               ALLEN Ebenen in eine Datei
 %
 % OUTPUT:
 % RESULTS         - (double array) Ergebnisse der Rechnung
 %                   1. Spalte phi der Ebene 
 %                   2. Spalte psi der Ebene
-%                   3.-... Spalte Durchläufe bis Anriss für verschiedene 
-%                          Schädigungsmodelle
+%                   3.-... Spalte Durchlaeufe bis Anriss fuer verschiedene 
+%                          Schaedigungsmodelle
 % DLc             - Durchlaufe in kritischer Ebene
 % phic,psic       - Winkel kritische Ebene
 % Totaltime       - Dauer der Gesamten Rechnung (nur wenn Displayausgabe an
@@ -74,17 +74,18 @@ function [RESULTS,DLc,phic,psic,Totaltime] = schadensrechnung_kerb(jobname,outpa
 if optdisplay
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
-    fprintf('Jobname           :%s\n',jobname);
-    fprintf('Verfahren         :%s\n',KERBSIMU.verfahren);
-    fprintf('Materialmodell    :%s\n',KERBSIMU.material);
-    fprintf('Backstresstensoren:%i\n',KERBSIMU.M);
-    fprintf('Anzahl Druchläufe :%i\n',KERBSIMU.ndl);
-    fprintf('Anzahl Inkemente  :%i\n',KERBSIMU.ndata);
+    fprintf('Jobname            :%s\n',jobname);
+    fprintf('Verfahren          :%s\n',KERBSIMU.verfahren);
+    fprintf('Materialmodell     :%s\n',KERBSIMU.material);
+    fprintf('Backstresstensoren :%i,%i\n',KERBSIMU.M,KERBSIMU.eM);
+    fprintf('Nichtproportional  :%s\n',KERBSIMU.nppara);
+    fprintf('Anzahl Druchlaeufe :%i\n',KERBSIMU.ndl);
+    fprintf('Anzahl Inkemente   :%i\n',KERBSIMU.ndata);
     fprintf('Starte Kerbsimulation, ');
     tic;
 end
 Totaltime = 0;       % Runtime
-% Kerbsimulation ausführen
+% Kerbsimulation ausfuehren
 sigepsfile = KERBSIMU.kerbsimulation();
 % Displayausgabe
 if optdisplay
@@ -94,7 +95,7 @@ if optdisplay
 end
 
 %% Kritische Ebenen Rechnung
-% Winkel für kritische Ebene
+% Winkel fuer kritische Ebene
 dphi = winkel(3); phimin = winkel(2); phimax = winkel(1);
 dpsi = winkel(6); psimin = winkel(5); psimax = winkel(4);
 if optdisplay
@@ -108,7 +109,7 @@ if optdisplay
     fprintf('Anzahl zu berechnender Ebenen:%i\n',numwinkel);
     tic;
 end
-% % kritische Ebenen Rechnung - Rainflow einzeln Durchführen
+% % kritische Ebenen Rechnung - Rainflow einzeln Durchfuehren
 % [phic,psic,DLc,RESULTS] = criticalplaneV3(...
 %                      sigepsfile,KERBSIMU.ndata,...
 %                      dphi,phimax,phimin,dpsi,psimax,psimin,...
@@ -119,7 +120,7 @@ end
 %                      optallhcm,...
 %                      jobname,outpath);
 
-% kritische Ebenen Rechnung - Rainflow für Parameter Zusammen druchführen
+% kritische Ebenen Rechnung - Rainflow fuer Parameter Zusammen druchfuehren
 [phic,psic,DLc,RESULTS] = criticalplaneV5(...
                      sigepsfile,KERBSIMU.ndata,...
                      dphi,phimax,phimin,dpsi,psimax,psimin,...

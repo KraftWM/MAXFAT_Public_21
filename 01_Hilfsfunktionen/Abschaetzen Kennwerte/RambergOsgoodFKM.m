@@ -5,7 +5,7 @@ function [Kstrich,nstrich] = RambergOsgoodFKM(wsgruppe,Rm)
 %                          2 = Guss
 %                          3 = Aluknet
 %                          4 = Aluguss
-%                          5 = Höchstfester Stahl
+%                          5 = Hoechstfester Stahl
 % Rm       - Zugefestigkeit
 % -------------------------------------------------------------------------
 if any(wsgruppe == 1) || strcmp(wsgruppe,'Stahl')
@@ -36,7 +36,7 @@ elseif any(wsgruppe == 4) || strcmp(wsgruppe,'Aluguss')
     bsig = 0.742;
     beps = -1.183;
     epsgrenz = 1e40;
-elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Höchstfester Stahl')
+elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Hoechstfester Stahl')
     asig = 2.66;
     aeps = 1400;
     bsig = 0.895;
@@ -44,7 +44,7 @@ elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Höchstfester Stahl')
     epsgrenz = 0.099;
     nstrich = 0.085;
 else
-    msg = 'Falsche Werstoffgrupppe übergeben, Rechnung wird abgebrochen';
+    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
     error(msg)
     
 end 

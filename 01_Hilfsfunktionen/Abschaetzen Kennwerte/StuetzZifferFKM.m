@@ -1,17 +1,17 @@
 function [n,nst,nbm] = StuetzZifferFKM(Asig,G,Rm,wsgruppe)
-% Bestimmt die Sützwirkung nach FKM Richtlinie Nichtlinear
+% Bestimmt die Suetzwirkung nach FKM Richtlinie Nichtlinear
 % Gleichung 2.5-27 & Folgende
-% Asig     - Hochbeanspruchte Oberfläche
+% Asig     - Hochbeanspruchte Oberflaeche
 % G        - bezogener Spannungsgradient
 % wsgruppe - Wrkstoffgrupe 1 = Stahl
 %                          2 = Guss
 %                          3 = Aluknet
 %                          4 = Aluguss
-%                          5 = Höchstfester Stahl
+%                          5 = Hoechstfester Stahl
 % Rm       - Zugefestigkeit
 % -------------------------------------------------------------------------
 
-% ... statistische Stüzziffer
+% ... statistische Stuezziffer
 % Weibull - Exponent
 if any(wsgruppe == 1) || strcmp(wsgruppe,'Stahl')
     kst = 30;
@@ -25,19 +25,19 @@ elseif any(wsgruppe == 3) || strcmp(wsgruppe,'Aluknet')
 elseif any(wsgruppe == 4) || strcmp(wsgruppe,'Aluguss')
     kst = 20;
     Rmbm = 270;
-elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Höchstfester Stahl')
+elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Hoechstfester Stahl')
     kst = 30;
     Rmbm = 680;
 else
-    msg = 'Falsche Werstoffgrupppe übergeben, Rechnung wird abgebrochen';
+    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
     error(msg)    
 end 
-% Referenzfläche
+% Referenzflaeche
 Aref = 500; %mm^2
-% Stützziffer
+% Stuetzziffer
 nst = (Aref/Asig)^(1/kst);
 
-% ... bruchmechanische Stützziffer
+% ... bruchmechanische Stuetzziffer
 kline = 5 * nst + Rm/Rmbm * sqrt( (7.5 + sqrt(G))/(1+0.2*sqrt(G)) );
 nbm = (5 + sqrt(G))/kline;
 nbm = max([nbm 1]);

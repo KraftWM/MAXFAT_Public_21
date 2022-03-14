@@ -1,9 +1,9 @@
 function signal = sinus_zwischenwerte(UKP,nzw)
-% Funktion füllt eine Umkehrpunktfolge mit zwischenwerten mit Sinus auf
+% Funktion fuellt eine Umkehrpunktfolge mit Zwischenwerten mit Sinus auf
 %
 % INPUT:
 % UKP     - Umkehrpunktfolge (nkana,nukp)
-% nzw     - Anzahl zwischenwerte die zwischen jeden UKP eingefügt werden
+% nzw     - Anzahl zwischenwerte die zwischen jeden UKP eingefuegt werden
 % 
 %
 % OUTPUT:
@@ -11,11 +11,11 @@ function signal = sinus_zwischenwerte(UKP,nzw)
 %
 % -------------------------------------------------------------------------
 
-% Größe des Signals
+% Groeße des Signals
 nkana = size(UKP,1);
 nukp = size(UKP,2);
 
-% Speicher fürs Signal
+% Speicher fuers Signal
 signal = NaN(nkana,nukp+(nukp-1)*nzw);
 signal(:,1) = UKP(:,1);
 zsignal = 1;
@@ -23,7 +23,7 @@ zsignal = 1;
 % Zwischenwerte Hochsetzten
 nzw = nzw + 1;
 
-% Schleife über alle UKP
+% Schleife ueber alle UKP
 for i = 2:nukp
     
     for j = 1:nkana

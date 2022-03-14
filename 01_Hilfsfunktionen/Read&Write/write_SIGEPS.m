@@ -6,7 +6,7 @@ function write_SIGEPS(jobname,outpath,DLZ,SIG,varargin)
 % INPUT:
 % jobname   - (str) Name der Outputdatei = jobname_SIGEPS.dat
 % outpath   - (str) Pfad zu OutputFolder
-% DLZ       - Durchlaufzähler
+% DLZ       - Durchlaufzaehler
 % SIG       - Verlauf der Spannungen (ESZ) e R^(3,numdata) oder (3D) e R^(6,numdata)
 % varargin  - EPS Verlauf der Dehnungen (ESZ) e R^(4,numdata) oder (3D) e R^(6,numdata)
 % 
@@ -20,17 +20,17 @@ ntens = size(SIG,1);                                                       % Anz
 ndata = size(SIG,2);
 if nargin == 4 % Schreibe *.pth
     dateiname = [jobname,'.pth'];                                          % Dateiname
-    DATA = [DLZ;SIG];                                                      % Output Zusannemfügen 
+    DATA = [DLZ;SIG];                                                      % Output Zusannemfuegen 
 else % Schreibe *.sig
     dateiname = [jobname,'.sig'];                                          % Dateiname
     EPS = varargin{1,1}*100;                                               % Dehnungen in Prozent
-    DATA = [DLZ;SIG;EPS];                                                  % Output Zusannemfügen
+    DATA = [DLZ;SIG;EPS];                                                  % Output Zusannemfuegen
 end
 
 % ... Dateiname
 name = [outpath,'\',dateiname];                                            % Voller name
 
-% ... Öffne Datei
+% ... oeffne Datei
 fid = fopen(name,'w');
 
 % ... Schreibe Header (je nach Spannungszustand)

@@ -5,7 +5,7 @@ function SIGV = vonMisesSpannung(SIG)
 % SIG      - Spannungstensor (ntens x ndata)
 %
 % OUTPUT:
-% SIGV     - Vergleichsspannung (1 x ndata
+% SIGV     - Vergleichsspannung (1 x ndata)
 % -------------------------------------------------------------------------
 
 % Abbildungen

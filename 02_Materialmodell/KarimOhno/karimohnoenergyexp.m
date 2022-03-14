@@ -1,18 +1,18 @@
 function [ZVARneu] = karimohnoenergyexp(domega,ZVAR,para,GHAT,PHAT)
 % Karim Ohno Plastizitätsmodell.
-% implementiert für die energiegesteuerte integration bei inkrementellen
+% implementiert für die energiegesteuerte Integration bei inkrementellen
 % Kerbnäherungen
 %
 % INPUT:
-%  domega -> Inkrement der energie
+%  domega -> Inkrement der Energie
 %  ZVAR   -> Zustandsvariablen
 %  para   -> Parameter des Pseudo Modells und des Materialmodells
 %  CEL    -> elastische Steifigkeit
-%  GHAT   -> Ableitung energie nach spannungen
-%  PHAT   -> Ableitung energie nach plastischen Dehnungen
+%  GHAT   -> Ableitung Energie nach Spannungen
+%  PHAT   -> Ableitung Energie nach plastischen Dehnungen
 %
 % OUTPUT:
-%  ZVARneu -> neuer zustand nach inkrement
+%  ZVARneu -> neuer Zustand nach inkrement
 %
 %__________________________________________________________________________
 %

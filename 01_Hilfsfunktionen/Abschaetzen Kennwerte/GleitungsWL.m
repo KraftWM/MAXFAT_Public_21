@@ -1,5 +1,5 @@
 function [tf,gf,bg,cg] = GleitungsWL(sf,ef,b,c,hyp,varargin)
-% Schätzt zyklische Kurve für Gleitungen aus zyklischer Kurve für Dehnungen
+% Schätzt zyklische Kurve für Gleitungen aus zyklischer Kurve fuer Dehnungen
 % nach verschiedenen Hypothesen.
 % sf,ef,b,c  - Parameter DWL
 % hyp        - Vergleichshypothese

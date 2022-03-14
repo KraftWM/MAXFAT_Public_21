@@ -1,12 +1,12 @@
 function load = lastgenerator(typ,amp,pha,fre,mit,ndp)
-% Funktion generiert Lastfolge für die Zeit t = [0,1]
+% Funktion generiert Lastfolge fuer die Zeit t = [0,1]
 % 
 % INPUT:
 % typ    - 1 = Sinus, 2 = Dreieck, 3 = Trapez
 % amp    - Amplitude
 % pha    - Phasenverschiebung (in Grad)
 % fre    - Frequenz
-% mit    - mittelwert
+% mit    - Mittelwert
 % ndp    - Anzahl Datenpunkte (insgesamt)
 % 
 % OUTPUT:
@@ -17,7 +17,7 @@ if typ == 2 % Dreieck
     % https://en.wikipedia.org/wiki/Triangle_wave
     % ... dummy Zeit
     t = 0:1/ndp:1-1/ndp;
-    % ... Wellenlänge
+    % ... Wellenlaenge
     T = 1/fre;
     % ... Phasenverschiebung normieren
     pha = pha/360*T;
@@ -26,7 +26,7 @@ if typ == 2 % Dreieck
 elseif typ == 3 % Trapez
     % ... dummy Zeit
     t = 0:1/ndp:1-1/ndp;
-    % ... Wellenlänge
+    % ... Wellenlaenge
     T = 1/fre;
     % ... Phasenverschiebung normieren
     pha = pha/360*T;

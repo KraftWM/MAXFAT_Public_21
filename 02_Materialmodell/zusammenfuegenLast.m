@@ -1,5 +1,7 @@
 function [L,DLZ] = zusammenfuegenLast(l,ndl)
-% Funktion erzeugt mehre Durchläufe durch die Lastfolge
+% Funktion erzeugt mehre Durchläufe durch die Lastfolge, bestimmt dabei
+% Anfahrtsweg vom unbelasteten Zustand und Zwischenwerte zwischen zwei
+% Durchlaeufen
 %
 % INPUT:
 % l       - Lastfolge (double array, size: ntens x ndata)

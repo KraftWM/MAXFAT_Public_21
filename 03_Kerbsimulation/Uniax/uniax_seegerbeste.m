@@ -1,5 +1,5 @@
 function [esig,eepsp] = uniax_seegerbeste(E,sig,epsp,Kprime,nprime,Kp)
-% einachsiger seeger beste
+% einachsiger Seeger Beste
 %  !!!!!  zur ermittlung von BAUTEILFLIEßKURVEN !!!!!
 %
 % INPUT:
@@ -108,7 +108,7 @@ function [f,d] = zielfun(L,sig,omega,E,Kprime,nprime,Kp)
     if u <= 1e-3
          d = 1 + u^2/6 + 2*u^3/45 + (1/fak)^2 - 1/fak;
     else
-        d = 2/u^2 * log(1/cos(u)) + (1/fak)^2 - 1/fak;                              % Hilfsvariable
+        d = 2/u^2 * log(1/cos(u)) + (1/fak)^2 - 1/fak;                     % Hilfsvariable
     end
 %     d =  min(2/u^2,1e40) * abs(log(1/cos(u)))  + fak^2 - fak;
     f = d*L*Kp*estar - omega;

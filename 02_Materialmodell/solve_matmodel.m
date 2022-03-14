@@ -2,7 +2,7 @@ function [OUT,EPSP,ZVAR1] = solve_matmodel(matmodell,ntens,ndi,para,M,inkflag,lo
 % Funktion Integriert ein Materialmodell und gibt Spannungen und Dehnungen
 % zurück
 % INPUT:
-%    matmodell     - (str) "Jiang","OhnoWang","Chaboche","KarimOhno",
+%    matmodell     - (str) "Jiang","OhnoWang","Chaboche","KarimOhno","OWT"
 %                          "Doring" -> bei Döring Modell gut aufpassen mit
 %                          den Parametern, keine Entfestigung bei
 %                          Spannungssteurung und nur 3D & ESZ

@@ -1,17 +1,20 @@
 function ax = plot_BWL(ax,N,Amp,messflag,titleName,legendentry,YAxisLabel,varargin)
-% Plotet Bauteilwöhlerlinie
+% Plotet Bauteilwoehlerlinie
 % INPUT:
 % ax          - axis handle
 % Nexp        - Experimentelle Ergebnisse
 % Ncalc       - Rechenergebnisse 
 % messflag    - 0 keine Messwerte 1 Messwerte
 % titlename   - Name der figure
-% legendentry - Eintrag für Legende
-% YAxisLabel  - Label für y achse
+% legendentry - Eintrag fuer Legende
+% YAxisLabel  - Label fuer y achse
 % varargin    - plot optionen
+%
+% OUTPUT:
+% ax          - axis handle
 %--------------------------------------------------------------------------
 
-% öffne Figure
+% oeffne Figure
 if ax == 0
     figure; grid on, hold on
     ax = gca;
@@ -36,9 +39,28 @@ end
 N = N(I);
 
 
-% Durchläufer
+% Durchlaeufer
 if messflag
-    Durchlaeuferpfeil
+    % Einfuegen dieses Codes am besten zwischen "figure(..." und dem Plotten der
+    % Veruchspunkte, damit der Anfangspunkt des Pfeils hinter dem
+    % Versuchspunkt verschwindet.
+
+    % Die Variable N entspricht hier einem Vektor mit allen Anrisslebensdauern
+    % aus den Versuchen. Die Variable eps_a entspricht einem Vektor mit allen
+    % zugehoerigen, vorgegebenen Dehnungsamplituden.
+
+    Dauerfest = 1999999;                                                       % Durchlaeufer bei 2.000.000 Schwingspiele (automatischer Stop der Pruefmaschine)
+
+    N_D = N(N>Dauerfest);
+    Amp_D = Amp(N>Dauerfest);
+
+    pfeil = char(8599);                                                                  
+
+    Anzahl_Durchlaeufer = length(N_D);
+
+    for i = 1:Anzahl_Durchlaeufer
+    text(N_D(i),Amp_D(i),pfeil,'HorizontalAlignment','left','VerticalAlignment','baseline','FontSize',20,'Interpreter','tex');
+    end
 else
     Dauerfest = 5999999;  
     N_D = N(N>Dauerfest);
@@ -62,7 +84,7 @@ title(titleName);
 % Achsen beschneiden
 axis([xmin xmax ymin ymax]);
 
-% Legende Hinzufügen
+% Legende Hinzufuegen
 if strcmp(ax.Legend.String,'data1')
     ax.Legend.String = {legendentry};
 else

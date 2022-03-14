@@ -1,6 +1,7 @@
 classdef PFS_stuetz < handle
 % -------------------------------------------------------------------------
-% Klassendefinition: Schädigungsparameter von Fatemi & Socie
+% Klassendefinition: Schädigungsparameter von Fatemi & Socie mit
+% Wöhlerliniendefinition aus Stützstellen
 % Zusammenfassung aller Definitionen/ Optionen & Funktionen für
 % Schädigungsparameter PFS
 %
@@ -14,11 +15,11 @@ classdef PFS_stuetz < handle
 %                    !!!!!!!!! geteilt durch Fließspannung
 %     Pfs_WS_stuetz      - Stützstellen Pram-Wöhlerlinie bei definierter
 %                          Lebensdauer für Werkstoff
-%                          Pram_stuetz bei N = 1000
+%                          Pfs_stuetz bei N = 1000
 %         d1,d2          - Neigungen PWL
 %                          d1 für N < 1000
 %                          d2 für N > 1000
-%          fak           - Faktor Pram_bauteil = fak * Pram_WS_stuetz
+%          fak           - Faktor Pfs_bauteil = 1/fak * Pram_WS_stuetz
 %                          Zusammenfassung von Sicherheits & Stützfaktoren
 %      varargin          - variabler Input
 %                       'VarName1',var1,'VarName2',var2,...)

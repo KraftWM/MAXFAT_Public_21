@@ -26,6 +26,7 @@ function para = ro2paraV2(typ,...
 %                      "OhnoWang"
 %                      "Jiang"
 %                      "KarimOhno"
+%                      "OWT"
 % verfahren_flag  -> Entscheidet, welches Verfahren zum setzten der
 %                   Stützstellen verwendet wird.
 % varargin        -> Variabler Input je nach Verfahren
@@ -39,7 +40,7 @@ function para = ro2paraV2(typ,...
 % verfahren_flag == 2 -> geometrische Folge nach Döring
 %                       varargin{1,1} = q -> Quotien ep_i+1 = 1/q * ep_i
 %
-% verfahren_flag == 3 -> verfahren von Simon
+% verfahren_flag == 3 -> verfahren von Simon Moser
 %                       varargin{1,1} = q -> Anteil plastischer Dehnungen 
 %                                            an gesamtdehnung bei
 %                                            Fließbegindd

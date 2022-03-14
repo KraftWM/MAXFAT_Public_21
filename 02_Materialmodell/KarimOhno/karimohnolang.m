@@ -1,6 +1,6 @@
 function [ZVARneu] = karimohnolang(desig,ZVAR,para)
 % Implementierung des Materialmodells nach Karim und Ohno, für pseudo
-% stress aproach nach Lang 
+% stress approach nach Lang 
 %
 % ! Nur Spannungssteuerung im ESZ
 %

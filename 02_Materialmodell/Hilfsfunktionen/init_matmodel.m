@@ -4,6 +4,16 @@ function [ZVAR0] = init_matmodel(...
 % - Überprüft ob korrekte Anzahl der Materialparameter
 % - Initialisiert Zustandsvariablen
 % - Wählt Materialfunktion aus
+%
+% INPUT:
+% matmodell    - (str) Name des Materialmodells
+% ntens        - (int) Anzahl Tensorkomponenten
+% parameter    - (array) Parameter des Materialmodells
+% M            - (int) Anzahl der Backstresstensoren
+%
+% OUTPUT:
+% ZVAR0        - Zustandsvariablen für unbelasteten Zustand
+% -------------------------------------------------------------------------
 
 switch matmodell
     case 'Chaboche'

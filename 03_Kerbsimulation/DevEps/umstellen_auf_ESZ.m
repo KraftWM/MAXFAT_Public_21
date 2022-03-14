@@ -4,7 +4,7 @@ function [ZVARESZ] = umstellen_auf_ESZ(ZVAR,material,M)
 %
 % (dehnungsgesteuertes) Werkstoffmodell wird auf ESZ Modell
 % umgestellt
-% (spannungsgesteuertes) Struckturmodell wird auf ESZ Modell
+% (spannungsgesteuertes) Strukturmodell wird auf ESZ Modell
 % umgestellt
 %
 % INPUT:

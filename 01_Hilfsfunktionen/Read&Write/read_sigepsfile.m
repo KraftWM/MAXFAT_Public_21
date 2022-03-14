@@ -1,7 +1,22 @@
 function [SIG,EPS,DLZ] = read_sigepsfile(sigepsfile,ntens,ndi)
-% Öffne Datei
+% Auslesen von binary Dateien
+% gedacht fuer Ergebnisse der Materialmodelle
+%
+% INPUT:
+% sigepsfile    - Dateiname
+% ntens         - Anzahl Tensorkomponenten
+% ndi           - Anzahl Nebendiagonalelemente
+%
+% OUTPUT:
+% SIG           - Spannungen
+% EPS           - Dehnungen
+% DLZ           - Durchlaufzaehler
+% _________________________________________________________________________
+
+
+% oeffne Datei
 fid = fopen(sigepsfile,'r'); 
-% Unterscheide Spannungszustände 
+% Unterscheide Spannungszustaende 
 if ntens == 6 && ndi == 3 % 3D
     nin = 13; % DATA = fread(fid,[13,Inf],'double');
     nsig = 6;

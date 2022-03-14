@@ -1,5 +1,5 @@
 function gamma_L = AbsicherungLastfolgeFKM(verfahren,sL,Lmax,PL,PA)
-% statistische Absicherung der Lastfolge nach FKM Richtlinie Nichtlinear
+% Statistische Absicherung der Lastfolge nach FKM Richtlinie Nichtlinear
 % siehe Abschnitt 2.3.2
 %
 % INPUT:
@@ -9,7 +9,7 @@ function gamma_L = AbsicherungLastfolgeFKM(verfahren,sL,Lmax,PL,PA)
 %              2 - Annahme einer logarithmisch-normalverteilten Streuung 
 %                  mit Standardabweichung LSDs nach FKM-Richtlinie
 %
-%              3 - Als Pauschalwert bei unbekannter Streuung fur PL = 2,5%
+%              3 - Als Pauschalwert bei unbekannter Streuung fuer PL = 2,5%
 %
 %  sl        - Streuung normal oder log normal Verteilung je nach Verfahren
 %  Lmax      - maximalwert Lastfolge;

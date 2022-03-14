@@ -23,7 +23,7 @@ function [ZVARneu] = ohnowangRR2(ntens, ndi, ink, ZVAR, ink_flag, parameter)
 %
 %
 %    OUTPUT:
-%        ZVARneu    -> neue zustandsvariablen nach Lastinkrement
+%        ZVARneu    -> neue Zustandsvariablen nach Lastinkrement
 %    
 %    NOTATIONEN:
 %    Spannungen                 Verzerrungen
@@ -33,7 +33,7 @@ function [ZVARneu] = ohnowangRR2(ntens, ndi, ink, ZVAR, ink_flag, parameter)
 %           sig_12                     2eps_12
 %  ----------------------------------------------------------------------
 % |  Autor: Jan Kraft 2019 Tu Darmstadt FG Werkstoffmechanik             |
-% |  Stand: August 2021                                                 |
+% |  Stand: August 2021                                                  |
 %  ----------------------------------------------------------------------
 
 

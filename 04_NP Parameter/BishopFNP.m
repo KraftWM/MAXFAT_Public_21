@@ -1,6 +1,7 @@
 function [FNP] = BishopFNP(sig)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
+% Aus Masterarbeit Andreas Kern
 %--------------------------------------------------------------------------
 %                      Eingabedaten auswerten
 %--------------------------------------------------------------------------

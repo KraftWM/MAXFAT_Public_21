@@ -221,7 +221,7 @@ dpiter = zeros(1,maxiter+2);     % Speicher plastische dehnungsinkremente
 normpiter = zeros(1,maxiter+2);  % Norm Abbruchbedingung (für Konvergnz Analyse)
 iter = 1;                        % Schleifenzähler 
 tol = 1e-4;                      % toleranz Abbruchbedingung
-tolbs = 1e-6;                    % toleranz iteration Backstresstensor
+% tolbs = 1e-6;                    % toleranz iteration Backstresstensor
 normp = 1;                       % Abbruchbedingung
 
 

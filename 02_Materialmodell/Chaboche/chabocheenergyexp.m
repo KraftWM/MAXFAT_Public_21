@@ -1,5 +1,5 @@
 function [ZVARneu] = chabocheenergyexp(domega,ZVAR,para,GHAT,PHAT)
-% Chaboche Plastizitätsmodell .
+% Chaboche Plastizitätsmodell:
 % implementiert für die energiegesteuerte integration bei inkrementellen
 % Kerbnäherungen
 %

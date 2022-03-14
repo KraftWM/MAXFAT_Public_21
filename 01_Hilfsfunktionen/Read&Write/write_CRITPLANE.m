@@ -4,11 +4,11 @@ function write_CRITPLANE(jobname,outpath,dmgmodel,D)
 % INPUT:
 % jobname   - (str) Name der Outputdatei = jobname_SIGEPS.dat
 % outpath   - (str) Pfad zu OutputFolder
-% dmgmodel  - (cell array) objekte der Schädigungsparameter
+% dmgmodel  - (cell array) objekte der Schaedigungsparameter
 %  D        - (double array) 
 %            D(:,1) = Winkel phi
 %            D(:,2) = Winkel psi
-%            D(:,3) = Durchläufe
+%            D(:,3) = Durchlaeufe
 %
 % OUTPUT:
 %  erzeugte Datei jobname.cpl
@@ -22,7 +22,7 @@ numdmgs = length(dmgmodel);
 dateiname = [jobname,'.cpl'];
 name = [outpath,'\',dateiname];
 
-% ... Öffne Datei
+% ... Oeffne Datei
 fid = fopen(name,'w');
 
 % ... Schreibe Header & Format

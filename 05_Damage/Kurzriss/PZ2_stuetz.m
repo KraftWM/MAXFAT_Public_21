@@ -1,6 +1,7 @@
 classdef PZ2_stuetz < handle
 % -------------------------------------------------------------------------
-% Klassendefinition: Schädigungsparameter PZ
+% Klassendefinition: Schädigungsparameter PZ mit
+% Wöhlerliniendefinition aus Stützstellen
 % Zusammenfassung aller Definitionen/ Optionen & Funktionen für
 % Schädigungsparameter PZ, nach Hertel
 %

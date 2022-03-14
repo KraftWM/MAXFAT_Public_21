@@ -1,14 +1,23 @@
+function [UKP,IDX] = filterUKP(L)
 % -------------------------------------------------------------------------
 % Hilfsfunktion filtern Umkehrpunkte
-function [UKP,IDX] = filterUKP(L)
+% INPUT:
+%    L    - Lastfolge mit Zwischenpunkten
+%
+% OUTPUT:
+%  UKP    - Umkehrpunkte
+%  IDX    - Indices der Umkehrpunkte
+%
+% -------------------------------------------------------------------------
+
 % Bilde 1. Ableitung
 dL = diff(L,[],2);
 % Vorzeichenwechsel
 UKP = dL(:,1:end-1).*dL(:,2:end) <= 0 & L(:,3:end) ~= L(:,2:end-1);
 UKP = [true,UKP,true]; % Ersten und letzten Punkt erstmal behalten
-% Prüfe 1. Punkt !! Annahme Lastfolge startet in 0
+% Pruefe 1. Punkt !! Annahme Lastfolge startet in 0
 if sign(L(2)) == sign(L(1))         % Nur Filtern wenn Gleiches VZ
-    if abs(L(2)) > abs(L(1))        % Wenn 1. Punk näher am Ursprung liegt
+    if abs(L(2)) > abs(L(1))        % Wenn 1. Punk naeher am Ursprung liegt
         UKP(1) = false;
     end
 end

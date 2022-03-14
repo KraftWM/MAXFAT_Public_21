@@ -1,15 +1,15 @@
 function R = transformCP2CP(phi1,phi2,psi1,psi2,sigeps_flag)
-% Funktion gibt Rotationsmatrix für Tensoren in Voigt Notation zurück
+% Funktion gibt Rotationsmatrix fuer Tensoren in Voigt Notation zurueck
 % Rotiert wird zwischen zwei kritischen Ebenen.
 %
 % K0   -> Kerb Koordinatensysten (Ebener Spannungszustand)
 % K1   -> Koordinatensystem krtische Ebene 1 (3D Spannungszustand), bekannt
 % K2   -> Koordinatensystem krtische Ebene 2 (3D Spannungszustand)
 %
-% Rötationsmatrix rotiert von K1 -> K2
+% Rotationsmatrix rotiert von K1 -> K2
 %  2_SIG = R * 1_SIG
 %
-% Voigt Notation für Spannungen und Dehnungen in der kritischen Ebene:
+% Voigt Notation fuer Spannungen und Dehnungen in der kritischen Ebene:
 %         sigxx              epsxx
 %         sigyy              epsyy
 %  SIG =  sigzz       EPS =  epszz
@@ -18,8 +18,8 @@ function R = transformCP2CP(phi1,phi2,psi1,psi2,sigeps_flag)
 %         sigxz             2epsxz
 %
 % INPUT:
-%    phi1, psi1   - Rotationswinkel von K0->K1
-%    phi2, psi2   - Rotationswinkel von K0->K2   
+%    phi1, psi1   - Rotationswinkel von K0->K1 im Bogenmaß
+%    phi2, psi2   - Rotationswinkel von K0->K2 im Bogenmaß  
 %    sigeps_flag  - Unterscheide Rotation von Spannungen und Dehnngen
 %                   (wegen verdopplung der ND Elemente)
 %                   1 - Dehnungsrotation
@@ -45,7 +45,7 @@ R31 = -cos(psi1)*sin(psi2)*cos(dphi) + cos(psi2)*sin(psi1);
 R32 = -sin(psi2)*sin(dphi);
 R33 = sin(psi2)*sin(psi1)*cos(dphi)+cos(psi2)*cos(psi1);
 
-% ... Rotationsmatrix für Voigt Notation
+% ... Rotationsmatrix fuer Voigt Notation
 % Dehnungstransformation
 if sigeps_flag
     R = [    R11^2      R12^2      R13^2          R11*R12          R12*R13          R11*R13;...

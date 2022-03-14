@@ -5,7 +5,7 @@ function Msig = MittelspannungseinflussFKM(wsgruppe,Rm)
 %                          2 = Guss
 %                          3 = Aluknet
 %                          4 = Aluguss
-%                          5 = Höchstfester Stahl
+%                          5 = Hoechstfester Stahl
 % Rm       - Zugefestigkeit
 % -------------------------------------------------------------------------
 if any(wsgruppe == 1) || strcmp(wsgruppe,'Stahl')
@@ -20,11 +20,11 @@ elseif any(wsgruppe == 3) || strcmp(wsgruppe,'Aluknet')
 elseif any(wsgruppe == 4) || strcmp(wsgruppe,'Aluguss')
     am = 1;
     bm = -0.04;
-elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Höchstfester Stahl')
+elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Hoechstfester Stahl')
     am = 0.39;
     bm = -0.36;
 else
-    msg = 'Falsche Werstoffgrupppe übergeben, Rechnung wird abgebrochen';
+    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
     error(msg)    
 end 
 

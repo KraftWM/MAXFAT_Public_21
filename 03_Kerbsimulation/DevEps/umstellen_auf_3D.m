@@ -4,7 +4,7 @@ function [ZVAR3D] = umstellen_auf_3D(ZVAR,material,M,nu,flag)
 %
 % (dehnungsgesteuertes) Werkstoffmodell wird auf 3D Modell
 % umgestellt (nur fürn ESZ)
-% (spannungsgesteuertes) Struckturmodell wird auf 3D Modell
+% (spannungsgesteuertes) Strukturmodell wird auf 3D Modell
 % umgestellt (nur fürn ESZ)
 %
 % INPUT:

@@ -1,6 +1,6 @@
 classdef PZ2 < handle
 % -------------------------------------------------------------------------
-% Klassendefinition: Schädigungsparameter PZ
+% Klassendefinition: Schädigungsparameter PZ 
 % Zusammenfassung aller Definitionen/ Optionen & Funktionen für
 % Schädigungsparameter PZ, nach Hertel
 %

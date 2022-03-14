@@ -1,6 +1,6 @@
 function [X_neu, DEP , CEP] = karimohno(ntens, ndi, ink, X, ink_flag, parameter)
 % Implementierung des Materialmodells nach Karim und Ohno,
-% Kinematische Verfestigung ist lineare Interpolation zwischen Armstrong
+% kinematische Verfestigung ist lineare Interpolation zwischen Armstrong
 % Fredrick und OhnoWang Modell I Kinematik
 %
 % QUELLE MODELL:

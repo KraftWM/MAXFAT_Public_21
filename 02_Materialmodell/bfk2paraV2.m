@@ -1,5 +1,5 @@
 function para = bfk2paraV2(typ,bfk,M,modell,E,nu,verfahren_flag,varargin)
-% Funktion zum bestimmen der Materialparameter/ Struckturparameter aus
+% Funktion zum bestimmen der Materialparameter/ Strukturparameter aus
 % Bauteilfließkurve.
 %
 % funktion bereitet bfk so auf, dass diese der funktion fk2para übergeben
@@ -24,6 +24,7 @@ function para = bfk2paraV2(typ,bfk,M,modell,E,nu,verfahren_flag,varargin)
 %                      "OhnoWang"
 %                      "Jiang"
 %                      "KarimOhno"
+%                      "OWT"
 % E, nu           -> Elastizitätsparameter
 % verfahren_flag -> Entscheidet, welches Verfahren zum setzten der
 %                   Stützstellen verwendet wird.

@@ -1,6 +1,6 @@
 function [ZVARneu] = ohnowanglangRR2(desig, ZVAR, para, epara)
 % Ohno Wang Plastizitätsmodell für pseudo Stress approach nach Asatz
-% von Lang, implementierung nach Döring
+% von Lang, Implementierung nach Döring
 %
 % ! Nur Spannungssteuerung im ESZ
 %
@@ -17,7 +17,7 @@ function [ZVARneu] = ohnowanglangRR2(desig, ZVAR, para, epara)
 %  para  -> Parameter des Pseudo Modells und des Materialmodells
 %
 % OUTPUT:
-%  ZVARneu -> neuer zustand nach inkrement
+%  ZVARneu -> neuer Zustand nach Inkrement
 %
 %__________________________________________________________________________
 %

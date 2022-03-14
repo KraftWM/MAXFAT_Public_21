@@ -1,6 +1,7 @@
 classdef PRAM_stuetz < handle
 % -------------------------------------------------------------------------
-% Klassendefinition: Schädigungsparameter PRAM
+% Klassendefinition: Schädigungsparameter PRAM mit
+% Wöhlerliniendefinition aus Stützstellen
 % Zusammenfassung aller Definitionen/ Optionen & Funktionen für
 % Schädigungsparameter PRAM
 %
@@ -15,7 +16,7 @@ classdef PRAM_stuetz < handle
 %                          d1 für N < 1000
 %                          d2 für N > 1000
 %         Msig           - Mittelspannungsempfindlichkeit
-%          fak           - Faktor Pram_bauteil = fak * Pram_WS_stuetz
+%          fak           - Faktor Pram_bauteil = 1/fak * Pram_WS_stuetz
 %                          Zusammenfassung von Sicherheits & Stützfaktoren
 %           varargin     - variabler Input
 %                       'VarName1',var1,'VarName2',var2,...)
@@ -26,7 +27,7 @@ classdef PRAM_stuetz < handle
 % EIGENSCHAFTEN:
 % Public:
 %      cc          - counting channel, Zeiger auf die Zeile in Spannungen
-%                    und dehnungen die mit HCM gezählt wird
+%                    und Dehnungen die mit HCM gezählt wird
 %                    default = 7 (normaldehnung)
 %  Pram_WS_stuetz  - Stützstellen Pram-Wöhlerlinie bei definierter
 %                          Lebensdauer für Werkstoff

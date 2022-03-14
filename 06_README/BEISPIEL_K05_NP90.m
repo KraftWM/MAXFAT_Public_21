@@ -12,6 +12,7 @@
 clear 
 clc
 % Füge alle Funktionen Matlab Pfad hinzu
+% !!! Kommentieren aus wenn aus 06_README gesartet wird
 % run ../startup
 
 %% Definitionen Rechnung
@@ -30,7 +31,7 @@ nu = 0.3;                              % Querdehnzahl
 Rm = 541;                              % Zugfestigkeit 
 % zyklisch stabil (Ramberg Osgood)
 Ks = 839;% 1141;%                      % zyklische Steifigkeit 
-ns = 0.138;%    0.193;%                % verfestigungsexponent 
+ns = 0.138;%    0.193;%                % Verfestigungsexponent 
 % Dehnungswoehlerlinie
 sf = 762; ef = 0.415; b = -0.08; c = -0.556;
 ND=5e5; 
@@ -38,7 +39,7 @@ ND=5e5;
 %% Definitionen Bauteil
 
 % Übertragungsfaktoren Kerbradius 0.5mm 
-%     xx     yy     yy
+%     xx     yy     xy
 cf = [3.351 0.8351 0.0;...            % Nettospannung Zug
       0.0   0.0    1.963]';           % Nettospannung Torsion
 Kp = 2.7;                             % Traglastformzahl
@@ -90,7 +91,7 @@ AMP = [ ...
         183.3464944	162.9746617...
       ]';
 
-%% Abschaetzen Kennwerte nach FKM
+%% Abschaetzen der Kennwerte nach FKM
 
 % Werkstoffgruppe
 wsgruppe = 'Stahl';
@@ -139,20 +140,20 @@ for i = 1:size(AMP,2) % Sequenzielle Rechnung
                 'nppara',nppara,...
                 'Kp',Kp);
     % Definition einer Instanz des Parameters PRAM
-    % 1. Pram aus DehnungsWL
-    % 2. Pram anhand abgeschaetzter Stuetzstellen
+    % 1. Pram aus Dehnungs-WL
+    % 2. Pram_stuetz anhand abgeschaetzter Stuetzstellen
     Pram = PRAM(E,sf,ef,b,c,ND,Msig,'nst',n);
     Pram_s = PRAM_stuetz(E,Pram_WS_stuetz,d1_ram,d2_ram,Msig,fram);
     % Definition einer Instanz des Pramaters PFS
-    % 1. Pfs aus DehnungsWL
-    % 2. Pfs anhand abgeschaetzter Stuetzstellen
+    % 1. Pfs aus Dehnungs-WL
+    % 2. Pfs_stuetz anhand abgeschaetzter Stuetzstellen
     Rp02s = Ks*0.002^ns;
     sigF = 0.5 *(Rm+Rp02s);  % Fließgrenze als Mittelwert aus Rp02 und Rm
     Pfs = PFS(E,nu,sigF,sf,ef,b,c,ND,'nst',n);
     Pfs_s = PFS_stuetz(E,nu,Pfs.kfs,Pfs_WS_stuetz,d1_fs,d2_fs,fram);
     % Definition einer Instanz des Pramaters PZ
-    % 1. Pz aus DehnungsWL
-    % 2. Pz anhand abgeschaetzter Stuetzstellen
+    % 1. Pz aus Dehnungs-WL
+    % 2. Pz_stuetz anhand abgeschaetzter Stuetzstellen
     Pz = PZ2(E,nu,Rm,Ks,ns,sf,ef,b,c,ND,'nst',nst,'Gsig',Gsig,'Gtau',Gtau);
     Pz_s = PZ2_stuetz(E,nu,sigF,Pz_WS_stuetz,d_z,fraj,...
            'Pz_WSD_stuetz',Pz_WSD_stuetz,'Gsig',Gsig,'Gtau',Gtau);
@@ -164,14 +165,14 @@ for i = 1:size(AMP,2) % Sequenzielle Rechnung
     winkel = [90 0 9 45 0 45];
     % Funktion zum berechnen der Anrisslebensdauer
     [DL,DLc,phic,psic] = schadensrechnung_kerb(...
-              jobname,outpath,...   % Name der Rechnung
-              K,...           % Instanz der Kerbsimulation
-              DMGs,...        % Cell array Instanzen Schädigungsparameter
-              winkel,...      % Winkel kritische Ebenen Rechnung
-              1,...           % Display ausgabe
-              1,...           % File Ausgabe Ergebnisse kritische Ebene
-              1,...           % Ausgabe Ergebnisse Rainflow Zählung
-              0);             % Rainflow Zählung in allen Ebenen
+              jobname,outpath,...% Name der Rechnung
+              K,...              % Instanz der Kerbsimulation
+              DMGs,...           % Cell array Instanzen Schädigungsparameter
+              winkel,...         % Winkel kritische Ebenen Rechnung
+              1,...              % Display ausgabe
+              1,...              % File Ausgabe Ergebnisse kritische Ebene
+              1,...              % Ausgabe Ergebnisse Rainflow Zählung
+              0);                % Rainflow Zählung in allen Ebenen
 end
 
 % Ende der Rechnung

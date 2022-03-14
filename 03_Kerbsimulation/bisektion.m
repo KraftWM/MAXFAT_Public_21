@@ -18,12 +18,12 @@ function [ZVOUT, dOOUT] = bisektion(ZVIN, dOIN,...
 % dOIN        -> Inkrement der Energie e R^(ntens,1)
 % REF...      -> Referenzzustände e R^(ntens,1)
 % DEL         -> elastische Nachgiebigkeit e R^(ntens x ntens)
-% para        -> Modell parameter
+% para        -> Modell Parameter
 % matfun      -> Function handle für Materialfunktion
-% verfahren   -> Name des Verfahren, steuert energie- und
-%                ableitungsrechnung (str)
-% maxiter     -> maximal erlaubte anzahl an iterationen
-% tol         -> toleranz für abbruchbedingung
+% verfahren   -> Name des Verfahren, steuert Energie- und
+%                Ableitungsrechnung (str)
+% maxiter     -> maximal erlaubte Anzahl an Iterationen
+% tol         -> Toleranz für Abbruchbedingung
 % alpha       -> relaxationskoef.
 % dEEPS       -> erstes Inkrement der Dehnungen e R^(ntens,1)
 % lastschritt -> aktueller Lastschritt (für fehlerausgabe) e int

@@ -20,8 +20,8 @@ classdef PRAM < handle
 % EIGENSCHAFTEN:
 % Public:
 %      cc          - counting channel, Zeiger auf die Zeile in Spannungen
-%                    und dehnungen die mit HCM gezählt wird
-%                    default = 7 (normaldehnung)
+%                    und Dehnungen die mit HCM gezählt wird
+%                    default = 7 (Normaldehnung)
 % sf,ef,b,c        - Parameter Dehnungswöhlerlinie
 %   ND             - Dauerfestigkeit Basis WL
 %   E              - E Modul
@@ -38,8 +38,8 @@ classdef PRAM < handle
 % FUNKTIONEN:
 % Normal:
 %   pram        -> berechnet Schädigungsparameter
-%   rainflow    -> rainflowzählung mit hcm
-%   hcm         -> hcm zählung 
+%   rainflow    -> Rainflowzählung mit hcm
+%   hcm         -> hcm Zählung 
 %   lebendauer  -> berechnet Lebensdauer
 %   damage_akk  -> Schadensakkumulation
 % 
@@ -170,10 +170,10 @@ methods
             % end
             
             % -------------------------------------------------------------
-            % Schwingweite der Primären Schädiungsgröße (im normalfall normaldehnung)
+            % Schwingweite der Primären Schädiungsgröße (im Normalfall Normaldehnung)
             % deps = DATA(cc,io_auf) - DATA(cc,iu_auf);     % am aufsteigenden Ast
             % deps = DATA(cc,io_ab) - DATA(cc,iu_ab);       % am absteigenden Ast
-            deps = abs( DATA(obj.cc,I) - DATA(obj.cc,J) );        % willkürlich definiert
+            deps = abs( DATA(obj.cc,I) - DATA(obj.cc,J) );  % willkürlich definiert
             %... amplitude
             epsa = 0.5*deps;
             

@@ -14,7 +14,7 @@ function [ZVAR0, EZVAR0] = devepsapproachV2( ...
 %                   Spannungen
 % ntens, ndi     -> beschreiben Spannungszustand
 % material       -> definiert welche materialfunktion aufgerufen wird (str)
-% numink         -> Anzahl inkremente
+% numink         -> Anzahl Inkremente
 %  M             -> Anzahl Backstresstensoren
 %  eM            -> Anzahl Backstresstensoren Strukturmodell
 % SIGO           -> Oberflächennormalspannung für hydrostatische Korrektur

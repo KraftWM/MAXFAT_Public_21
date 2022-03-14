@@ -4,7 +4,7 @@ function [ZVAR0,EZVAR0] = ...
                           esigpath, DE,...
                           ntens, ndi, material, numink, ...
                           Outfile)
-% Funktion führt Pseudo Strain Approach nach Kötten/Barkey/Socie aus
+% Funktion führt Pseudo Strain Approach nach Köttgen/Barkey/Socie aus
 %
 % AKTUELL NUR FÜR ESZ 
 %
@@ -13,7 +13,7 @@ function [ZVAR0,EZVAR0] = ...
 %  para,epara    -> Parameter für mat und str modell
 % esigpath       -> Verweiß auf Datei mit verlauf der lokalen pseudo
 %                   Spannungen
-% DE             -> Elastischer Nachgibigkeitstensor
+% DE             -> Elastischer Nachgiebigkeitstensor
 % ntens, ndi     -> beschreiben Spannungszustand
 % material       -> definiert welche materialfunktion aufgerufen wird (str)
 % numink         -> Anzahl der Inkremente

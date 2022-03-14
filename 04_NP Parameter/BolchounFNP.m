@@ -1,4 +1,5 @@
 function [fnpBOL] = BolchounFNP(sig)
+% Aus Masterarbeit Andreas Kern
 
 sig_xx = sig(:,1);
 sig_yy = sig(:,2);

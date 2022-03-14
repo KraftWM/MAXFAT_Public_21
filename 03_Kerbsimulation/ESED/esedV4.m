@@ -2,23 +2,23 @@ function [ZVAR0,REF] = esedV4( ...
                                ZVAR0,REF0, para, esigpath, DEL, ...
                                ntens, ndi, material, numink,...
                                Outfile)
-% 2.Version der Implentation der ESED Methode für mehrachsige Kerbnäherung
+% 4.Version der Implentation der ESED Methode für mehrachsige Kerbnäherung
 %
 %  !!!!!    Strategie : In normalen Lastschritten explizite Integartion
 %                       An Umkehrpunkten implize Integartion !!!!!!!
 %
 % INPUT:
-% ZVAR0     -> Startwerte der Zustandsvariablen, Zustandsvariblen für die
+% ZVAR0     -> Startwerte der Zustandsvariablen, Zustandsvariablen für die
 %              Materialmodelle wie bei dehnungsgesteuerter integration
 % REF0      -> Startwerte der Refrenzzustände
 % para      -> Parameter Materialmodel
 % esigpath  -> Verweiß auf Datei mit verlauf der lokalen pseudo
 %              Spannungen
-% DEL       -> Elastischer Nachgibigkeitstensor
+% DEL       -> Elastischer Nachgiebigkeitstensor
 % ntens     -> Anzahl Tensorkomponenten
 % ndi       -> Anzahl Hauptdiagonalelemente
 % material  -> Definiert welches Materialmodell verwendet wird
-% numink    -> Anzahl inkremente der Lastfolge
+% numink    -> Anzahl Inkremente der Lastfolge
 % Outfile   -> Name der Datei in der die Ergebnisse geschrieben werden
 %
 % OUTPUT:

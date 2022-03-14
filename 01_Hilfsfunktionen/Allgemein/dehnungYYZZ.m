@@ -1,6 +1,6 @@
 function [EPS, EPSP] = dehnungYYZZ(EPS,EPSP,nu)
 % Funktion berechnet die nicht abgespeicherte Dehnungskomponten in YY und 
-% ZZ Richtung und fügt sie der Dehnung hinzu
+% ZZ Richtung und fuegt sie der Dehnung hinzu
 %
 % INPUT:
 %   EPS, EPSP -> Gesamt- & plastische Dehnung  aus sigma-tau,
@@ -22,18 +22,18 @@ function [EPS, EPSP] = dehnungYYZZ(EPS,EPSP,nu)
 EPSE = EPS - EPSP;  
 
 % plastische Komponente in ZZ Richtung
-% eyyp = - EPSP(1,:)./2 ;                                                    % plastischer Anteil der yy Dehnung aus 
+% eyyp = - EPSP(1,:)./2 ;                                                  % plastischer Anteil der yy Dehnung aus 
 ezzp = - EPSP(1,:)./2 ;                                                    % plastischer Anteil der zz Dehnung aus 
-                                                                           % inkompressiobilität plastischer Def.
+                                                                           % inkompressiobilitaet plastischer Def.
 % elastische Komponente in ZZ Richtung
 % eyye = -nu * EPSE(1,:);
-ezze = -nu * EPSE(1,:);                                                    % Elastischer Anteil aus elastizitätsgesetz
+ezze = -nu * EPSE(1,:);                                                    % Elastischer Anteil aus Elastizitaetsgesetz
 
 % gesamte Komponente in ZZ Richtung
 % eyy = eyye + eyyp;
 ezz = ezze + ezzp;
 
-% Zusammenschustern der gesamt- und plastischen dehnungen
+% Zusammenschustern der gesamt- und plastischen Dehnungen
 if size(EPS,1) == 2
     EPS = [EPS(1,:);ezz;ezz;EPS(2,:)];
     EPSP = [EPSP(1,:);ezzp;ezzp;EPSP(2,:)];

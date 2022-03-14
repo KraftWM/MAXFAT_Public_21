@@ -1,6 +1,7 @@
 function [FNP] = GaierFNP(sig)
 %UNTITLED8 Summary of this function goes here
 %   Detailed explanation goes here
+% Aus Masterarbeit Andreas Kern
 
 %--------------------------------------------------------------------------
 %                      Eingabedaten auswerten

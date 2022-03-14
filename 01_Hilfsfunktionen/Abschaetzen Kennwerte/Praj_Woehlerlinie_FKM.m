@@ -1,12 +1,12 @@
 function [Praj_WS_stuetz,Praj_WSD_stuetz,d,f0025] = Praj_Woehlerlinie_FKM(Rm,wsgruppe)
-% Bestimmt die Stützstelle für Praj nach FKM Richtlinie Nichtlinear
+% Bestimmt die Stuetzstelle fuer Praj nach FKM Richtlinie Nichtlinear
 % Gleichung 2.8-20 & Folgende 
 % !!! Ohne Sicherheitsfaktor
 % wsgruppe - Wrkstoffgrupe 1 = Stahl
 %                          2 = Guss
 %                          3 = Aluknet
 %                          4 = Aluguss
-%                          5 = Höchstfester Stahl
+%                          5 = Hoechstfester Stahl
 % Rm       - Zugefestigkeit
 % -------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@ elseif any(wsgruppe == 2) || strcmp(wsgruppe,'Stahlguss')
     d = -0.66;
     f0025 = 0.4;
 elseif any(wsgruppe == 4) || strcmp(wsgruppe,'Aluguss')
-    msg = 'Falsche Werstoffgrupppe übergeben, Rechnung wird abgebrochen';
+    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
     error(msg)  
 elseif any(wsgruppe == 3) || strcmp(wsgruppe,'Aluknet')
     apz = 101.7;
@@ -35,7 +35,7 @@ elseif any(wsgruppe == 3) || strcmp(wsgruppe,'Aluknet')
     bpd = 2.04;
     d = -0.61;
     f0025 = 0.36;
-elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Höchstfester Stahl')
+elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Hoechstfester Stahl')
     apz = 0.85;
     bpz = 0.98;
     apd = 4.25*10^-5;
@@ -43,11 +43,11 @@ elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Höchstfester Stahl')
     d = -0.56;
     f0025 = 0.31; 
 else
-    msg = 'Falsche Werstoffgrupppe übergeben, Rechnung wird abgebrochen';
+    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
     error(msg)    
 end 
 
-% ... berechne Stützstellen
+% ... berechne Stuetzstellen
 Praj_WS_stuetz = apz * Rm^bpz;
 Praj_WSD_stuetz = apd * Rm^bpd;
 
