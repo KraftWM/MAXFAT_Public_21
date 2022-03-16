@@ -597,8 +597,8 @@ methods
         % ... berechne P-WL aus D-WL
         function PN = dwl2pwl(E,sf,ef,b,c,ND,nst,miner)
             % ... faktor zum verschieben der WL !!! Ausgestellt
-%             fak = 1;
-            fak = nst^(1/b);
+            fak = 1;
+%             fak = nst^(1/b);
             % ... WL
             npt = 4;                % Anzahl Punkte auf WL
             PN = zeros(2,npt);      % Speicher (1.Zeile = Ssp, 2.Zeile = P)
@@ -608,7 +608,7 @@ methods
                 % ... Punkt P
                 P =  sqrt(sf^2 * (2*N*fak)^(2*b)+E*sf*ef*(2*N*fak)^(b+c));
                 % ... Parallel verschieben WL in Lastrichtung
-%                 P = nst * P;
+                P = nst * P;
                 % ... Speichern log
                 PN(1,i) = log10(N);
                 PN(2,i) = log10(P);

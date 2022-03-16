@@ -387,10 +387,10 @@ methods
                     N = obj.dauerfest;
                 end
                 % ... Schädigungsparameter (eigentlich quatsch)
-%                 fak = 1;% 
-                fak = obj.nst^(1/obj.bg);
+                fak = 1;% 
+%                 fak = obj.nst^(1/obj.bg);
                 P = obj.gf*(2*N*fak)^obj.cg + obj.tf/obj.G*(2*N*fak)^obj.bg;
-%                 P = obj.nst * P;
+                P = obj.nst * P;
             end
         end % Ende Berechnung Schädigungsparameter
         
@@ -793,8 +793,8 @@ methods
         % ... berechne P-WL aus DWL
         function PN = dwl2pwl(E,nu,sf,ef,b,c,ND,kfs,nst,miner)
             % ... faktor zum verschieben der WL !!! Ausgestellt
-%             fak = 1;
-            fak = nst^(1/b);            
+            fak = 1;
+%             fak = nst^(1/b);            
             % ... WL
             npt = 400;                % Anzahl Punkte auf WL
             PN = zeros(2,npt);      % Speicher (1.Zeile = Ssp, 2.Zeile = P)
@@ -805,7 +805,7 @@ methods
                 P = ( (1+nu)*sf/E*(2*N*fak)^b + 1.5*ef*(2*N*fak)^c )...
                         * (1 + kfs * 0.5 * sf * (2*N*fak) ^ b);
                 % ... Parallel verschieben WL in Lastrichtung
-%                 P = nst * P;
+                P = nst * P;
                 % ... Speichern log
                 PN(1,i) = log10(N);
                 PN(2,i) = log10(P);
@@ -829,8 +829,8 @@ methods
         % ... berechne P-WL aus GWL
         function PN = gwl2pwl(G,tf,gf,b0,c0,ND,nst,miner) 
             % ... faktor zum verschieben der WL !!! Ausgeschaltet
-            fak =  nst^(1/b0);
-%             fak = 1;
+%             fak =  nst^(1/b0);
+            fak = 1;
             % ... WL
             npt = 4;                % Anzahl Punkte auf WL
             PN = zeros(2,npt);      % Speicher (1.Zeile = Ssp, 2.Zeile = P)
@@ -840,7 +840,7 @@ methods
                 % ... Punkt P  aus Gleitungswl
                 P = tf/G*(2*N*fak)^b0 + gf*(2*N*fak)^c0;
                 % ... Parallel verschieben WL in Lastrichtung
-%                 P = nst * P;
+                P = nst * P;
                 % ... Speichern log
                 PN(1,i) = log10(N);
                 PN(2,i) = log10(P);
@@ -927,16 +927,17 @@ methods
                 gf,tf,b0,c0,...
                 sf,ef,b,c,...
                 sigF,G,nu,nst)
+            % !! k als Werkstoffkennwert ohne Stuetzwirkung
             % ... Stützwirkung
-            fak = nst^(1/b0);
-%             fak = 1;% 
+%             fak = nst^(1/b0);
+            fak = 1;% 
             % ... GleitungsWL
             gwl = gf*(2*N*fak)^c0 + tf/G*(2*N*fak)^b0;
 %             gwl = nst * gwl;
             % ... angepasse DehnungsWL
             E = G * 2 * (1+nu);
-%             fak = 1; % 
-            fak = nst^(1/b);
+            fak = 1; % 
+%             fak = nst^(1/b);
             ewl = (1+nu)*sf/E*(2*N*fak)^b+1.5*ef*(2*N*fak)^c;
 %             ewl = nst * ewl;
             % ... k = (gwl/ewl -1) * sigF/(sf*(2*N)^b)

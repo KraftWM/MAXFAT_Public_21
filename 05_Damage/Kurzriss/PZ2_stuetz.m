@@ -386,6 +386,7 @@ methods
         obj.Q = Q;
         obj.PZD0 = PZD0;
         obj.ND0 = ND0;
+        obj.ND_stuetz = ND0;
         obj.lstern = lstern;                                               % [mm]
         obj.ZeffthLR = ZeffthLR;       
     end % Ende Konstruktor
@@ -1184,7 +1185,7 @@ methods
         % -------------------------------------------------------------------------
         % Alle Durchläufe durchgehen (außer den Letzten)
         i = 1;
-        while ci < obj.ce && P(4,i) < ndl - 1
+        while ci < obj.ce && P(4,i) <= ndl - 1
             
             % ... Variablen
             mode = P(1,i);                     % Rissöffnungsmode
