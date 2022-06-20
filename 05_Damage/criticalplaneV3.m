@@ -195,7 +195,8 @@ for phi = phimin : dphi : phimax % Drehung um Z
             end
             
             % ... Lebendsdauer berechnen
-            DL(zahler_planes,2+i) = DMG.lebensdauer(P);
+            [DL(zahler_planes,2+i),~,PDam] = DMG.lebensdauer(P);
+            P = [P;PDam];
             
             % ... merke kritische ebene
             if DL(zahler_planes,2+i) < DLc(i)

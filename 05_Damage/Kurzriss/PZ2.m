@@ -356,7 +356,8 @@ methods
 %         Q = Q * obj.nst^(-1/obj.bf);
         % ... Verschiebung der PZ-WL in Lebensdauerrichtung aus der 
         %     um Faktor PZ_verschoben/PZ = nst 
-        Q = Q * obj.nst^(2*mJ);
+%         Q = Q * obj.nst^(2*mJ);
+        Q = Q * obj.nst^(mJ);
         % ... neues a0
         a0 = ( ae^(1-mJ) - (1-mJ)*CJ*Q )^(1/(1-mJ));
         % ... neues c0
@@ -1119,7 +1120,7 @@ methods
     end % Ende Kurzrissmode II & III
     
     % ... Lebensdauerrechnung
-    function [DL,SSP] = lebensdauer(obj,P,varargin)
+    function [DL,SSP,PDam] = lebensdauer(obj,P,varargin)
         % Funktion rechnet Lebensdauern aus Schädigungsparametern
         %
         % INPUT:
@@ -1133,11 +1134,15 @@ methods
         % OUTPUT:
         % DL             - Durchläufe
         % SSP            - Schwingspiele
+        % P              - Erweitert um 
+        %                  5. Zeile aktueller Schädigungsbeitrag
+        %                  6. Zeile akkumilierte Schädigung
         %__________________________________________________________________
         % -----------------------------------------------------------------
         % Durchläufe
         ndl = ceil(max(P(4,:)));              % Anzahl Durchläufe
-        
+        PDam = zeros(2,size(P,2));            % Speicher für Schädigung
+
         % -----------------------------------------------------------------
         % Anfangswerte Riss
         ai = obj.a0;
@@ -1188,7 +1193,7 @@ methods
             
             % ... lineare Schadensakkumulation
             [Dsum,Dakt] = obj.DamAkk(pz,obj.mJ,ND_pz(mode),PZD(mode),Dsum);
-            
+            PDam(:,i) = [Dakt;Dsum];
             % ... update RissLänge
             ai = ai + da*Dakt;
             ci = ci + dc(mode)*Dakt;
@@ -1240,7 +1245,7 @@ methods
                 
                 % ... lineare Schadensakkumulation
                 [Dsum,Dakt] = obj.DamAkk(pz,obj.mJ,ND_pz(mode),PZD(mode),Dsum);
-                
+                PDam(:,i) = [Dakt;Dsum];
                 % ... update RissLänge
                 ai = ai + da*Dakt;
                 ci = ci + dc(mode)*Dakt;

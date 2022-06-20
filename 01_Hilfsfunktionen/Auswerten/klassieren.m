@@ -1,4 +1,4 @@
-function [H,maxW] = klassieren(Data, ncl, plotopt,varargin)
+function [H,H2,maxW] = klassieren(Data, ncl, plotopt,varargin)
 % Funktion gibt Haeufigkeitsverteilung an
 % Input :
 % Data     - Datenreihe
@@ -9,19 +9,24 @@ function [H,maxW] = klassieren(Data, ncl, plotopt,varargin)
 %
 % Output:
 % H    - Haeufigkeitssumme
+% H2   - Anzahl Klassenwerte
 % maxW - Maximalwert
 %__________________________________________________________________________
 
 % Speicher
 H = zeros(1,ncl);     % Speicher fuer Haeufigkeitssumme
+H2 = zeros(1,ncl);    % Speicher fuer Anzahl Werte in Klasse
 % Maximalwert
 maxW = max(Data);
 % Klassieren
-dummy = int64(Data./maxW .* (ncl-1) + 1);
+% dummy = int64(Data./maxW .* (ncl-1) + 1);
+dummy = floor(Data./maxW .* (ncl-1) + 1);
+% dummy = ceil(Data./maxW .* (ncl-1) + 1);
 % Haefigkeitssumme
 for i = 1:ncl
     idx = dummy >= i;
     H(i) = sum(idx);
+    H2(i) = sum(dummy == i);
 end
 % ... Barplot
 if plotopt

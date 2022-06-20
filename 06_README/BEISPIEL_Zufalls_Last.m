@@ -12,11 +12,11 @@
 clear 
 clc
 % Füge alle Funktionen Matlab Pfad hinzu
-% run ../startup
+% run startup
 
 %% Definitionen Rechnung
 
-outpath = '../00_Temp';                % Name des Output Folders
+outpath = '00_Temp';                       % Name des Output Folders
 jobname = 'Random_Load';                   % Name der Rechnung
 
 if ~exist(outpath,'dir')
@@ -25,15 +25,24 @@ end
 
 %% Definition Materialmodell
 
+% % Aus Versuchen
 E = 204000;                            % E-Modul 
 nu = 0.3;                              % Querdehnzahl 
 Rm = 541;                              % Zugfestigkeit 
 % zyklisch stabil (Ramberg Osgood)
-Ks = 839;% 1141;%                      % zyklische Steifigkeit 
-ns = 0.138;%    0.193;%                % Verfestigungsexponent 
+Ks = 839;                              % zyklische Steifigkeit 
+ns = 0.138;                            % Verfestigungsexponent 
 % Dehnungswoehlerlinie
 sf = 762; ef = 0.415; b = -0.08; c = -0.556;
 ND=5e5; 
+
+% Abgeschätzt
+% wsgruppe = 'Stahl';
+% Rm = 541;
+% [E,nu] = StatischFKM(wsgruppe);                                            % Elastisches Materialverhalten
+% [Ks,ns] = RambergOsgoodFKM(wsgruppe,Rm);                                   % zyklisches Materialverhalten
+% [sf,ef,b,c] = DehnungsWoehlerlinie_Waechter(wsgruppe,Rm);                  % DehnungsWL
+% ND = 5e5;                                                                  % Dauerfestigkeit
 
 %% Definitionen Bauteil
 
@@ -89,6 +98,12 @@ omega = 2*pi*randi(Sekunden,3,1);                % (Kreis)Frequenzen
 LT = Lmit + sum(Lamp.*cos(omega.*t+phi),1);      % Lastfolge Torsion
 % Zusammenfassung
 last = [LZ;LT];
+% Lastfolge ploten
+figure, grid on, hold on
+plot(LZ,'LineWidth',1.3);
+plot(LT,'LineWidth',1.3);
+ylabel('Last'),xlabel('fiktive Zeit'),title('zufällige Lastfolge')
+legend('$L_{Zug}$','$L_{Torsion}$','Interpreter','latex','FontSize',14)
 
 %% Abschaetzen der Kennwerte nach FKM
 
@@ -129,15 +144,17 @@ K = Kerbsimulation(jobname,outpath,...
 % Definition einer Instanz des Parameters PRAM
 % 1. Pram aus Dehnungs-WL
 % 2. Pram_stuetz anhand abgeschaetzter Stuetzstellen
-Pram = PRAM(E,sf,ef,b,c,ND,Msig,'nst',n);
+Pram = PRAM(E,sf,ef,b,c,ND,Msig,'nst',n,'Miner',1);
 Pram_s = PRAM_stuetz(E,Pram_WS_stuetz,d1_ram,d2_ram,Msig,fram);
 % Definition einer Instanz des Pramaters PFS
 % 1. Pfs aus Dehnungs-WL
+% 2. Pfs aus Dehnungs-WL kfs = kfs(N)
 % 2. Pfs_stuetz anhand abgeschaetzter Stuetzstellen
 Rp02s = Ks*0.002^ns;
 sigF = 0.5 *(Rm+Rp02s);  % Fließgrenze als Mittelwert aus Rp02 und Rm
+[tf,gf,bg,cg] = GleitungsWL(sf,ef,b,c,1); % Abschätzen GLeitungs-WL
 Pfs = PFS(E,nu,sigF,sf,ef,b,c,ND,'nst',n);
-Pfs_var = PFS(E,nu,sigF,sf,ef,b,c,ND,'nst',n,'kfsopt','var','tf',sf/sqrt(3),'gf',ef*sqrt(3),'bg',b,'cg',c);
+Pfs_var = PFS(E,nu,sigF,sf,ef,b,c,ND,'nst',n,'kfsopt','var','tf',tf,'gf',gf,'bg',bg,'cg',cg);
 Pfs_s = PFS_stuetz(E,nu,Pfs.kfs,Pfs_WS_stuetz,d1_fs,d2_fs,fram);
 % Definition einer Instanz des Pramaters PZ
 % 1. Pz aus Dehnungs-WL
@@ -145,10 +162,11 @@ Pfs_s = PFS_stuetz(E,nu,Pfs.kfs,Pfs_WS_stuetz,d1_fs,d2_fs,fram);
 Pz = PZ2(E,nu,Rm,Ks,ns,sf,ef,b,c,ND,'nst',nst,'Gsig',Gsig,'Gtau',Gtau);
 Pz_s = PZ2_stuetz(E,nu,sigF,Pz_WS_stuetz,d_z,fraj,...
     'Pz_WSD_stuetz',Pz_WSD_stuetz,'Gsig',Gsig,'Gtau',Gtau);
+
+
 % Zusammenfassen aller Instanzen der definierten Schaedigungsparameter
 % als cell array
 DMGs = {Pram, Pram_s, Pfs, Pfs_var, Pfs_s, Pz, Pz_s};
-%     DMGs = {Pram_s, Pfs_s, Pz_s};
 % winkel = [phi_max, phi_min, dphi, psi_max, psi_min, dpsi]
 winkel = [90 0 9 45 0 45];
 % Funktion zum berechnen der Anrisslebensdauer
@@ -157,7 +175,7 @@ winkel = [90 0 9 45 0 45];
     K,...              % Instanz der Kerbsimulation
     DMGs,...           % Cell array Instanzen Schädigungsparameter
     winkel,...         % Winkel kritische Ebenen Rechnung
-    1,...              % Display ausgabe
+    1,...              % Display Ausgabe
     1,...              % File Ausgabe Ergebnisse kritische Ebene
     1,...              % Ausgabe Ergebnisse Rainflow Zählung
     0);                % Rainflow Zählung in allen Ebenen
@@ -165,12 +183,6 @@ winkel = [90 0 9 45 0 45];
 
 % Ende der Rechnung
 
-%% Plot der Ergebnisse
-
-% Lastfolge
-% Plot
-figure, grid on, hold on
-plot(LZ,'LineWidth',1.3);
-plot(LT,'LineWidth',1.3);
-ylabel('Last'),xlabel('fiktive Zeit'),title('zufällige Lastfolge')
-legend('$L_{Zug}$','$L_{Torsion}$','Interpreter','latex','FontSize',14)
+%%
+% [PHI,PSI,DL2,zmin] = read_CRITPLANE([outpath,'/',jobname,'.cpl']);
+% plot_CRITPLANE(PHI,PSI,DL2(:,6),1,'$P_Z$')

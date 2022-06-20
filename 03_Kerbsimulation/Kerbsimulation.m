@@ -320,25 +320,27 @@ classdef Kerbsimulation < handle
        % ------------------------------------------------------------------
        % Nichtproportionalitätskorrektur
        obj.NPkorrektur(ESIG);
-             
-       % ------------------------------------------------------------------
-       % Bestimme Materialparameter
-       obj.checkParaOpt();
-       % ... Parameter sind nicht selbst gesetzt
-       if isnan(obj.para)
-           obj.para = obj.bestimmeParameter("werkstoff");
-       end 
-       % ... Grenzwert
-%        obj.maxSigModell = spannungsgrenzwert(obj.material,obj.para,obj.M);
        
        % ------------------------------------------------------------------
        % Bestimme Strukturparameter
+       obj.checkParaOpt();
        % ... Parameter sind nicht selbst gesetzt
        if isnan(obj.epara)
            obj.epara = obj.bestimmeParameter(obj.verfahren);
        end 
        % ... Grenzwert
 %        obj.maxESigModell = spannungsgrenzwert(obj.material,obj.epara,obj.eM);
+
+
+       % ------------------------------------------------------------------
+       % Bestimme Materialparameter       
+       % ... Parameter sind nicht selbst gesetzt
+       if isnan(obj.para)
+           obj.para = obj.bestimmeParameter("werkstoff");
+       end 
+       % ... Grenzwert
+%        obj.maxSigModell = spannungsgrenzwert(obj.material,obj.para,obj.M);       
+       
        
        % ------------------------------------------------------------------
        % Setze Startwerte
@@ -668,7 +670,7 @@ classdef Kerbsimulation < handle
                                     obj.E, obj.nu, obj.Knp, obj.nstrich,...
                                     obj.M, obj.material, ...
                                     obj.optpara,obj.q,obj.ep_M,...
-                                    obj.eindkerb,obj.Kp);
+                                    obj.eindkerb,obj.Kp,obj.epara(end));
                     end
                 else
                     parameter = bfk2paraV2(typ,obj.fk, ...
@@ -705,7 +707,7 @@ classdef Kerbsimulation < handle
                                 obj.E, obj.nu, obj.Kstrich, obj.nstrich,...
                                 obj.eM, obj.material, ...
                                 obj.eoptpara,obj.eq,obj.eep_M,...
-                                obj.eindkerb,obj.Kp);
+                                obj.eindkerb,obj.Kp,obj.para(end));
                     end
                 end
                 % ... Sonderbehandlung OWT Modell

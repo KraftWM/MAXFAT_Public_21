@@ -58,7 +58,7 @@ function para = ro2paraV2(typ,...
 %                      "Seeger Heuler"
 %                      "Seeger Beste"
 % Kp             -> Traglastformzahl für einige 1d Kerbnäherungen (e R)
-%
+% r0             -> Startradius FF
 % _________________________________________________________________________
 % OUTPUT:
 % para            -> Materialparameter des Modells
@@ -74,14 +74,14 @@ function para = ro2paraV2(typ,...
 % Variablen Input 
 % ... Erstmal default Werte
 if verfahren_flag == 2 
-    defaultval = {0.333, 0.03, 'Neuber', 1.001};
+    defaultval = {0.333, 0.03, 'Neuber', 1.001,NaN};
 elseif verfahren_flag == 3
-    defaultval = {0.01, 0.03, 'Neuber', 1.001};
+    defaultval = {0.01, 0.03, 'Neuber', 1.001,NaN};
 elseif verfahren_flag == 1
-    defaultval = {500, 0.03, 'Neuber', 1.001};
+    defaultval = {500, 0.03, 'Neuber', 1.001,NaN};
 else
     verfahren_flag = 3;
-    defaultval = {0.333, 0.03, 'Neuber', 1.001};
+    defaultval = {0.333, 0.03, 'Neuber', 1.001,NaN};
 end
 % ... setze variablen input
 nvarin = size(varargin,2);
@@ -94,6 +94,7 @@ q = defaultval{1};
 epM = defaultval{2};
 ksim1d = defaultval{3}; 
 Kp = defaultval{4}; 
+r0 = defaultval{5};
 
 % -------------------------------------------------------------------------
 % initialisiere lokale variablen
@@ -116,8 +117,9 @@ if verfahren_flag == 1
     % Zug festigkeit
     Rm = q;%varargin{1,1};
     % zyklische Fließspannung definiert bei 0.01% plastischer Dehnung
-    r0 = Kstrich * 0.0001^nstrich;
-
+    if isnan(r0)
+        r0 = Kstrich * 0.0001^nstrich;
+    end
     % Spannungen und Dehnungen bei Fließbeginn
     sig(1) = r0;
     epsp(1) = 0.0001;
@@ -136,11 +138,18 @@ if verfahren_flag == 1
 % -------------------------------------------------------------------------
 % Geometrische Folge
 elseif verfahren_flag == 2
-    % zyklische Fließspannung definiert bei 0.01% plastischer Dehnung
-    r0 = Kstrich * 0.0001^nstrich;
+    
     % Spannungen und Dehnungen bei Fließbeginn
-    sig(1) = r0;
-    epsp(1) = 0.0001;
+    if isnan(r0)
+        % zyklische Fließspannung definiert bei 0.01% plastischer Dehnung
+        r0 = Kstrich * 0.0001^nstrich;
+        sig(1) = r0;
+        epsp(1) = 0.0001;
+    else
+        sig(1) = r0;
+        epsp(1) = (r0/Kstrich)^(1/nstrich);
+    end
+
     % Stüzstellen echte zyklische Werkstoffkurve
     % als geometrische Reihe nach Döring
     for ii = 1 : M
@@ -157,16 +166,21 @@ elseif verfahren_flag == 2
 % Verfahren von Simon
 elseif verfahren_flag == 3
     % bestimme Fließspannung
-    r0 = 10^( ( log10(q/((1-q)*E)) + 1/nstrich * log10(Kstrich) ) /... 
-              (1/nstrich - 1) ...
-              );
-    epsp(1) = 0.0;
-    sig(1) = r0;
+    if isnan(r0)
+        r0 = 10^( ( log10(q/((1-q)*E)) + 1/nstrich * log10(Kstrich) ) /... 
+                  (1/nstrich - 1) ...
+                  );
+        epsp(1) = 0.0;
+        sig(1) = r0;
+    else
+        sig(1) = r0;
+        epsp(1) = 0;        
+    end
     % bestimme ersten stützpunkt
     sig(2) = 1/(1-nstrich) * r0;
     epsp(2) = (sig(2)/Kstrich)^(1/nstrich);
     % bestimme Restliche Stützstellen
-    for ii = 3 : M+1
+    for ii = 3 : M+1    
         epsp(ii) = 10 ^ (log10(epsp(2)) + (ii-2) * ( log10(epM) - ...
                                                    log10(epsp(2)) )/(M-1));
         sig(ii) = Kstrich * epsp(ii)^nstrich;

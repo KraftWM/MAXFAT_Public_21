@@ -137,7 +137,7 @@ methods
         
         % -----------------------------------------------------------------
         % Variabler Input
-        if nargin >= 9
+        if nargin >= 7
             nvarargin = length(varargin);
             for i = 2:2:nvarargin
                 varname = varargin{i-1};
@@ -497,7 +497,7 @@ methods
         end % Ende hcm
         
         % ... Lebensdauer Rechnung 
-        function [DL,SSP] = lebensdauer(obj,P)
+        function [DL,SSP,PDam] = lebensdauer(obj,P)
             % Funktion rechnet Lebensdauern aus Schädigungsparametern
             %
             % INPUT:
@@ -509,11 +509,15 @@ methods
             % OUTPUT:
             % DL             - Durchläufe
             % SSP            - Schwingspiele
+            % P              - Erweitert um 
+            %                  4. Zeile aktueller Schädigungsbeitrag
+            %                  5. Zeile akkumilierte Schädigung
             %______________________________________________________________
             
             %--------------------------------------------------------------
             % Schädigungsrechnunge
-            nP = size(P,2);            % Anzahl Werte in P             
+            nP = size(P,2);            % Anzahl Werte in P          
+            PDam = zeros(2,nP);          % Speicher für Schädigung
             Dsum = 0;                  % Schadenssumme
             Dlast = 0;                 % Schädigung letzter Durchlauf
             ndl = ceil(max(P(3,:)));   % maximale Anzahl an Durchläufen
@@ -522,6 +526,7 @@ methods
             for i = 1: nP
                 % ... Schädigung aus WL
                 [Dakt,Dsum] = obj.damage_akk(P(2,i),Dsum);
+                PDam(:,i) = [Dakt;Dsum];
                 % ... Schädigung des letzten Durchlaufsspeichern
                 if P(3,i) > ndl - 1
                     Dlast = Dlast + Dakt;
@@ -546,7 +551,7 @@ methods
                 return;
             end
             
-            
+
             %--------------------------------------------------------------
             % Schauen obs kaputt is
             if Dsum >= 1
@@ -603,6 +608,9 @@ methods
                     end
                 end
             end
+
+            % Schadensakkumulation
+            Dsum = Dsum + Dakt;
         end % Ende Schadensakkumulation
     
         % ... plote P-WL
@@ -615,7 +623,8 @@ methods
             else
                 ax = varargin{1};
             end
-            plot([1, obj.N_stuetz, obj.ND_stuetz],[(1/obj.N_stuetz)^obj.d1*obj.Pram_Bau_stuetz, obj.Pram_Bau_stuetz, obj.Pram_BauD_stuetz])
+            plot([1, obj.N_stuetz, obj.ND_stuetz, 1e20], ...
+            [(1/obj.N_stuetz)^obj.d1*obj.Pram_Bau_stuetz, obj.Pram_Bau_stuetz, obj.Pram_BauD_stuetz,(1e20/obj.ND_stuetz)^obj.d3*obj.Pram_BauD_stuetz])
             set(ax,'XScale','log','YScale','log');
             set(ax,'XLim',[1 1e7])
             xlabel('N'), ylabel('P')

@@ -32,6 +32,8 @@ while status
     if tline == -1
         % ... Lesen abbrechen
         status = 0;
+    elseif strcmp(tline,'#HCM')
+        status = 0;
     else
         % ... lese Werte
         [P(:,z),z] = readVal(tline,z,nc);
@@ -49,20 +51,30 @@ end % Ende Funktion
 function [p,z] = readVal(tline,z,nc)
     k = strfind(tline,';');
     p = zeros(nc,1);
-    if length(k) == 2
-        % ... SWT oder FS
+    if ~isempty(k)
         p(1,1) = str2double(tline(1:k(1)-1));
-        p(2,1) = str2double(tline(k(1)+1:k(2)-1));
-        p(3,1) = str2double(tline(k(2)+1:end));
-        z = z + 1;
-    elseif length(k) == 3
-        % ... kurzriss
-        p(1,1) = str2double(tline(1:k(1)-1));
-        p(2,1) = str2double(tline(k(1)+1:k(2)-1));
-        p(3,1) = str2double(tline(k(2)+1:k(3)-1));
-        p(4,1) = str2double(tline(k(3)+1:end));
+        for i = 2:nc-1
+            p(i,1) = str2double(tline(k(i-1)+1:k(i)-1));
+        end
+        p(nc,1) = str2double(tline(k(nc-1)+1:end));
         z = z + 1;
     end
+%     if length(k) == 4
+%         % ... SWT oder FS
+%         p(1,1) = str2double(tline(1:k(1)-1));
+%         p(2,1) = str2double(tline(k(1)+1:k(2)-1));
+%         p(3,1) = str2double(tline(k(2)+1:end));
+%         p(4,1) = str2double(tline(k(1)+1:k(2)-1));
+%         p(5,1) = str2double(tline(k(2)+1:end));
+%         z = z + 1;
+%     elseif length(k) == 5
+%         % ... kurzriss
+%         p(1,1) = str2double(tline(1:k(1)-1));
+%         p(2,1) = str2double(tline(k(1)+1:k(2)-1));
+%         p(3,1) = str2double(tline(k(2)+1:k(3)-1));
+%         p(4,1) = str2double(tline(k(3)+1:end));
+%         z = z + 1;
+%     end
 
 end
 
@@ -75,6 +87,8 @@ function [nl,nc] = GetNumberOfLine(fname)
     while stat
         tline = fgetl(fid);
         if tline == - 1
+            stat = 0;
+        elseif strcmp(tline,'#HCM')
             stat = 0;
         else
             if nl > 0

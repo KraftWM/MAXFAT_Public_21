@@ -1124,7 +1124,7 @@ methods
     end % Ende Kurzrissmode II & III
     
     % ... Lebensdauerrechnung
-    function [DL,SSP] = lebensdauer(obj,P,varargin)
+    function [DL,SSP,PDam] = lebensdauer(obj,P,varargin)
         % Funktion rechnet Lebensdauern aus Schädigungsparametern
         %
         % INPUT:
@@ -1138,10 +1138,14 @@ methods
         % OUTPUT:
         % DL             - Durchläufe
         % SSP            - Schwingspiele
+        % P              - Erweitert um 
+        %                  5. Zeile aktueller Schädigungsbeitrag
+        %                  6. Zeile akkumilierte Schädigung
         %__________________________________________________________________
         % -----------------------------------------------------------------
         % Durchläufe
         ndl = ceil(max(P(4,:)));              % Anzahl Durchläufe
+        PDam = zeros(2,size(P,2));            % Speicher für Schädigung
         
         % -----------------------------------------------------------------
         % Anfangswerte Riss
@@ -1193,7 +1197,7 @@ methods
             
             % ... lineare Schadensakkumulation
             [Dsum,Dakt] = obj.DamAkk(pz,obj.mJ,ND_pz(mode),PZD(mode),Dsum);
-            
+            PDam(:,i) = [Dakt;Dsum];
             % ... update RissLänge
             ai = ai + da*Dakt;
             ci = ci + dc(mode)*Dakt;
@@ -1245,7 +1249,7 @@ methods
                 
                 % ... lineare Schadensakkumulation
                 [Dsum,Dakt] = obj.DamAkk(pz,obj.mJ,ND_pz(mode),PZD(mode),Dsum);
-                
+                PDam(:,i) = [Dakt;Dsum];
                 % ... update RissLänge
                 ai = ai + da*Dakt;
                 ci = ci + dc(mode)*Dakt;

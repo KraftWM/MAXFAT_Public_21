@@ -3,10 +3,13 @@ function [Pram_WS_stuetz,Pram_WSD_stuetz,d1,d2,f0025] = Pram_Woehlerlinie_FKM(Rm
 % Gleichung 2.5-22 & Folgende 
 % !!! Ohne sicherheitsfaktor
 % wsgruppe - Wrkstoffgrupe 1 = Stahl
-%                          2 = Guss
+%                          2 = Stahlguss
 %                          3 = Aluknet
 %                          4 = Aluguss
-%                          5 = Hoechstfester Stahl
+%                          5 = GJS
+%                          6 = GJM
+%                          7 = GJL
+%                          8 = Hoechstfester Stahl
 % Rm       - Zugefestigkeit
 % -------------------------------------------------------------------------
 
@@ -26,10 +29,7 @@ elseif any(wsgruppe == 2) || strcmp(wsgruppe,'Stahlguss')
     bpd = 0.96;
     d1 = -0.289;
     d2 = -0.189;
-    f0025 = 0.51;
-elseif any(wsgruppe == 4) || strcmp(wsgruppe,'Aluguss')
-    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
-    error(msg)  
+    f0025 = 0.51; 
 elseif any(wsgruppe == 3) || strcmp(wsgruppe,'Aluknet')
     apz = 16.71;
     bpz = 0.537;
@@ -38,7 +38,7 @@ elseif any(wsgruppe == 3) || strcmp(wsgruppe,'Aluknet')
     d1 = -0.238;
     d2 = -0.167;
     f0025 = 0.61;
-elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Hoechstfester Stahl')
+elseif any(wsgruppe == 8) || strcmp(wsgruppe,'Hoechstfester Stahl')
     apz = 18;
     bpz = 0.587;
     apd = 0.73;
@@ -47,8 +47,15 @@ elseif any(wsgruppe == 5) || strcmp(wsgruppe,'Hoechstfester Stahl')
     d2 = -0.145;
     f0025 = 0.65; 
 else
-    msg = 'Falsche Werstoffgrupppe uebergeben, Rechnung wird abgebrochen';
-    error(msg)    
+    msg = 'Falsche Werstoffgrupppe uebergeben, Werte für Stahl werden übernommen';
+    warning(msg)  
+    apz = 20;
+    bpz = 0.587;
+    apd = 0.82;
+    bpd =  0.92;
+    d1 = -0.302;
+    d2 = -0.197;
+    f0025 = 0.71;
 end 
 
 % ... berechne Stuetzstellen

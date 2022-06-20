@@ -74,8 +74,8 @@ l = sort(eig(I),'descend');
 FNP = sqrt(l(6)/l(5));
 
 if abs(imag(FNP))>0
-    msg = ['FNP Gaier komplex. Realteil verwenden: FNP = ',num2str(FNP)];
-    warning(msg)
+%     msg = ['FNP Gaier komplex. Realteil verwenden: FNP = ',num2str(FNP)];
+%     warning(msg)
     FNP = real(FNP);
 end
 end

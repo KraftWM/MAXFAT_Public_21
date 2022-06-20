@@ -12,12 +12,11 @@
 clear 
 clc
 % Füge alle Funktionen Matlab Pfad hinzu
-% !!! Kommentieren aus wenn aus 06_README gesartet wird
 % run ../startup
 
 %% Definitionen Rechnung
 
-outpath = '../00_Temp';                % Name des Output Folders
+outpath = '00_Temp';                % Name des Output Folders
 jobpart = 'K05_NP_';                   % Name der Rechnung
 
 if ~exist(outpath,'dir')
@@ -26,6 +25,8 @@ end
 
 %% Definition Materialmodell
 
+% Aus Versuchen
+% statisch
 E = 204000;                            % E-Modul 
 nu = 0.3;                              % Querdehnzahl 
 Rm = 541;                              % Zugfestigkeit 
@@ -35,6 +36,15 @@ ns = 0.138;%    0.193;%                % Verfestigungsexponent
 % Dehnungswoehlerlinie
 sf = 762; ef = 0.415; b = -0.08; c = -0.556;
 ND=5e5; 
+
+
+% % Abgeschätzt
+% wsgruppe = 'Stahl';
+% Rm = 541;
+% [E,nu] = StatischFKM(wsgruppe);                                            % Elastisches Materialverhalten
+% [Ks,ns] = RambergOsgoodFKM(wsgruppe,Rm);                                   % zyklisches Materialverhalten
+% [sf,ef,b,c] = DehnungsWoehlerlinie_Waechter(wsgruppe,Rm);                  % DehnungsWL
+% ND = 5e5;                                                                  % Dauerfestigkeit
 
 %% Definitionen Bauteil
 
@@ -122,7 +132,6 @@ fraj = AbsichernBauteilWoehlerlinie_Praj(P_A,n,KPR,f0025);
 % können diese auch parallel ausgeführt werden.
 
 % parfor i = 1:size(AMP,2) % Parallele Rechnung, ! optdisplay auf 0 setzten
-
 for i = 1:size(AMP,2) % Sequenzielle Rechnung    
     % Amplitude aktueller Versuch
     amp = AMP(:,i);
@@ -160,7 +169,7 @@ for i = 1:size(AMP,2) % Sequenzielle Rechnung
     % Zusammenfassen aller Instanzen der definierten Schaedigungsparameter
     % als cell array
     DMGs = {Pram, Pram_s, Pfs, Pfs_s, Pz, Pz_s};
-%     DMGs = {Pram_s, Pfs_s, Pz_s};
+%     DMGs = {Pram, Pram_s, Pfs, Pfs_s};
     % winkel = [phi_max, phi_min, dphi, psi_max, psi_min, dpsi]
     winkel = [90 0 9 45 0 45];
     % Funktion zum berechnen der Anrisslebensdauer

@@ -449,7 +449,7 @@ methods
         end % Ende hcm
         
         % ... Lebensdauer Rechnung 
-        function [DL,SSP] = lebensdauer(obj,P)
+        function [DL,SSP,PDam] = lebensdauer(obj,P)
             % Funktion rechnet Lebensdauern aus Schädigungsparametern
             %
             % INPUT:
@@ -461,11 +461,15 @@ methods
             % OUTPUT:
             % DL             - Durchläufe
             % SSP            - Schwingspiele
+            % P              - Erweitert um 
+            %                  4. Zeile aktueller Schädigungsbeitrag
+            %                  5. Zeile akkumilierte Schädigung
             %______________________________________________________________
             
             %--------------------------------------------------------------
             % Schädigungsrechnunge
-            nP = size(P,2);            % Anzahl Werte in P             
+            nP = size(P,2);            % Anzahl Werte in P 
+            PDam = zeros(2,nP);          % Speicher für Schädigung
             Dsum = 0;                  % Schadenssumme
             Dlast = 0;                 % Schädigung letzter Durchlauf
             ndl = ceil(max(P(3,:)));   % maximale Anzahl an Durchläufen
@@ -474,6 +478,7 @@ methods
             for i = 1: nP
                 % ... Schädigung aus WL
                 [Dakt,Dsum] = obj.damage_akk(P(2,i),Dsum);
+                PDam(:,i) = [Dakt;Dsum];
                 % ... Schädigung des letzten Durchlaufsspeichern
                 if P(3,i) > ndl - 1
                     Dlast = Dlast + Dakt;
@@ -497,7 +502,8 @@ methods
                 SSP = obj.dauerfest;
                 return;
             end
-            
+
+                       
             
             %--------------------------------------------------------------
             % Schauen obs kaputt is
@@ -599,12 +605,14 @@ methods
             % ... faktor zum verschieben der WL !!! Ausgestellt
             fak = 1;
 %             fak = nst^(1/b);
-            % ... WL
-            npt = 4;                % Anzahl Punkte auf WL
-            PN = zeros(2,npt);      % Speicher (1.Zeile = Ssp, 2.Zeile = P)
+            % ... WL mit Stützstellen
+            Nstuetz = [1,10,1000,100000];            % Stützpunkte Wöhlerlinie
+            npt = length(Nstuetz);                   % Anzahl Punkte auf WL
+            PN = zeros(2,npt);                       % Speicher (1.Zeile = Ssp, 2.Zeile = P)
             for i = 1:npt
                 % ... Punkt N
-                N = ND^((i-1)/(npt-1));
+%                 N = ND^((i-1)/(npt-1));
+                N = Nstuetz(i);
                 % ... Punkt P
                 P =  sqrt(sf^2 * (2*N*fak)^(2*b)+E*sf*ef*(2*N*fak)^(b+c));
                 % ... Parallel verschieben WL in Lastrichtung
@@ -613,7 +621,16 @@ methods
                 PN(1,i) = log10(N);
                 PN(2,i) = log10(P);
             end
-            
+
+            % ... Dauerfestigkeit mit Steigung aus Abschnitt 1e3<N<1e5
+            % Steigung & konstante ln(N) = k * ln(P) + m
+            k = (PN(1,npt) - PN(1,npt-1))/(PN(2,npt) - PN(2,npt-1));
+            m = PN(1,npt) - k * PN(2,npt);
+            % Dauerfestigkeit
+            npt = npt + 1;
+            PN(1,npt) = log10(ND);
+            PN(2,npt) = 1/k * (log10(ND)-m);
+
             % ... Anpassen für elementare oder Mod. Miner
             if miner == 0 || miner == 1
                 % ... Steigung letzter Punkt
@@ -621,11 +638,12 @@ methods
                 if miner == 1 % modifiziert
                     % ... Steigung anpassen bei elementarem Miner
                     k = 2*k - 1;
+                    m = PN(1,npt) - k * PN(2,npt);
                 end
-                % ... neuer Dauerfestigkeitswert bei 1/2
-                PN(2,npt) = PN(2,npt) + log10(0.5);
-                % ... neue Ecklastspeilzahl bei 1/2 Dauerfestigkeit
-                PN(1,npt) = PN(1,npt) + k *log10(0.5);
+                % ... neuer Dauerfestigkeitswert bei 1e9 Schwingspielen
+                npt = npt + 1;
+                PN(1,npt) = 9;
+                PN(2,npt) = 1/k * (9-m);
             end
         end % Ende bestimmen P-WL
                

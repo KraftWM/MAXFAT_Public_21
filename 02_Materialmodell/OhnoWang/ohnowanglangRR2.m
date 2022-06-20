@@ -185,7 +185,7 @@ EINS = diag([1 1 1]);    % Einheitstensor
 % ------------------------------------------------------------------------- 
 
 % Speicher und Abbruchbedingungen
-maxiter = 1000;                   % Maximale Iterationsschleifen
+maxiter = 3000;                   % Maximale Iterationsschleifen
 dpiter = zeros(1,maxiter+2);     % Speicher plastische dehnungsinkremente
 normpiter = zeros(1,maxiter+2);  % Norm Abbruchbedingung (für Konvergnz Analyse)
 iter = 1;                        % Schleifenzähler 
@@ -302,7 +302,7 @@ for i = 1 : eM
         %             normfiter(iterbs) = normf;
         % keine Endlossschleifen
         if iterbs > maxiter
-            msg = ['Keine Konvergenz in ',mystr,' Backstress',num2str(bs),' im Ohno Wang Modell ',...
+            msg = ['Keine Konvergenz in Backstress',num2str(i),' im Ohno Wang Modell ',...
                 'nach ', num2str(iterbs),' Iterationen. Aktuelle Fehlernorm: '...
                 num2str(normf)];
             warning(msg);
@@ -435,17 +435,18 @@ while normp > tol
 %             normfspeicher(iterbs) = normf;
             % keine Endlossschleifen
             if iterbs > maxiter
-                msg = ['Keine Konvergenz in ',mystr,' Backstress',num2str(bs),' im Ohno Wang Modell ',...
+                msg = ['Keine Konvergenz in Backstress',num2str(i),' im Ohno Wang Modell ',...
                     'nach ', num2str(iterbs),' Iterationen. Aktuelle Fehlernorm: '...
                     num2str(normf)];
                 warning(msg);
-                %                 fprintf('dp = %.10f n = [%.4f %.4f %.4f %.4f %.4f %.4f] ',dp_npe,n_npe)
-                %                 figure, grid on, hold on
-                %                 plot(normfiter,'.-');
-                %                 set(gca,'YScale','log');
+%                                 fprintf('dp = %.10f n = [%.4f %.4f %.4f %.4f %.4f %.4f] ',dp_npe,n_npe)
+%                                 figure, grid on, hold on
+%                                 plot(normfiter,'.-');
+%                                 set(gca,'YScale','log');
                 break;
             end
         end % Ende Newtoniteration
+%         fprintf('numiter = %5i\n',iterbs);
         % Speichern konvergierte Ergebnisse
         norm_aei(i) = norma;
         ew_i_npe(i) = wi;
