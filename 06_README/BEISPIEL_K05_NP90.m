@@ -116,13 +116,15 @@ Msig = MittelspannungseinflussFKM(wsgruppe,Rm);
 % Absicherung Bauteilwoehlerlinie
 fram = AbsichernBauteilWoehlerlinie_Pram(P_A,n,KPR,f0025);
 % Pfs - Woehlerlinie (vorlaufig)
-[Pfs_WS_stuetz,Pfs_WSD_stuetz,d1_fs,d2_fs] = ...
-                      Pfs_Woehlerlinie(Rm,wsgruppe);
+[Pfs_WS_stuetz,Pfs_WSD_stuetz,d1_fs,d2_fs,kfs,f0025] = ...
+                      Pfs_WoehlerlinieV2(Rm,wsgruppe);
+% Absichern Bauteilwoehlerlinie
+ffs = AbsichernBauteilWoehlerlinie_Pfs(P_A,n,KPR,f0025);
 % Pz - Woehlerlinie (vorlaufig aus Praj Woehlerlinie)
 [Pz_WS_stuetz,Pz_WSD_stuetz,d_z,f0025] = ...
                       Pz_Woehlerlinie(Rm,wsgruppe);
 % Absicherung Bauteilwoehlerlinie
-fraj = AbsichernBauteilWoehlerlinie_Praj(P_A,n,KPR,f0025);
+fz = AbsichernBauteilWoehlerlinie_Pz(P_A,n,KPR,f0025);
 
 %% Rechnung 
 
@@ -159,12 +161,13 @@ for i = 1:size(AMP,2) % Sequenzielle Rechnung
     Rp02s = Ks*0.002^ns;
     sigF = 0.5 *(Rm+Rp02s);  % Fließgrenze als Mittelwert aus Rp02 und Rm
     Pfs = PFS(E,nu,sigF,sf,ef,b,c,ND,'nst',n);
-    Pfs_s = PFS_stuetz(E,nu,Pfs.kfs,Pfs_WS_stuetz,d1_fs,d2_fs,fram);
+    Pfs_s = PFS_stuetz(E,nu,kfs,Pfs_WS_stuetz,d1_fs,d2_fs,ffs,...
+                       'N_stuetz',100);
     % Definition einer Instanz des Pramaters PZ
     % 1. Pz aus Dehnungs-WL
     % 2. Pz_stuetz anhand abgeschaetzter Stuetzstellen
     Pz = PZ2(E,nu,Rm,Ks,ns,sf,ef,b,c,ND,'nst',nst,'Gsig',Gsig,'Gtau',Gtau);
-    Pz_s = PZ2_stuetz(E,nu,sigF,Pz_WS_stuetz,d_z,fraj,...
+    Pz_s = PZ2_stuetz(E,nu,sigF,Pz_WS_stuetz,d_z,fz,...
            'Pz_WSD_stuetz',Pz_WSD_stuetz,'Gsig',Gsig,'Gtau',Gtau);
     % Zusammenfassen aller Instanzen der definierten Schaedigungsparameter
     % als cell array

@@ -2,6 +2,8 @@ function [Pfs_WS_stuetz,Pfs_WSD_stuetz,d1,d2,kfs,f0025] = Pfs_WoehlerlinieV2(Rm,
 % Bestimmt die Stuetzstelle fuer Pfs, Indem in die Formel für Pfs die
 % abschätzung der DehnungsWL nach der FKM Methode (Wächter) eingesetzt
 % wird
+%
+% Pfs_WS_stuetz bei N = 100
 % wsgruppe - Wrkstoffgrupe 1 = Stahl
 %                          2 = Stahlguss
 %                          3 = Aluknet
