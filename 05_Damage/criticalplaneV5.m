@@ -127,6 +127,7 @@ Data = zeros(13,ndata);
 fid = fopen(sigepsfile,'r'); 
 Data([13 1 2 4 7 8 9 10],:) = fread(fid,[8,Inf],'double');
 fclose(fid);
+ndl = ceil(Data(13,end));
 % aktueller Winkel (Kerbkoordinatensystem)
 phi1 = 0;
 psi1 = 0;
@@ -217,7 +218,7 @@ for phi = phimin : dphi : phimax % Drehung um Z
             end
             
             % ... Lebendsdauer berechnen
-            [DL(zahler_planes,2+i),~,PDam] = DMG.lebensdauer(P{i});
+            [DL(zahler_planes,2+i),~,PDam] = DMG.lebensdauer(P{i},ndl);
             P{i} = [P{i};PDam];
             
             % ... merke kritische ebene

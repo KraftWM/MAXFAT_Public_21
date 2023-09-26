@@ -1,5 +1,6 @@
 function ffs = AbsichernBauteilWoehlerlinie_Pfs(PA,n,KRP,f0025)
 % Bestimmt Faktor zum Absichern der Bauteilwoehlerlinie von Pfs
+% aus Abschlussbericht FKM Projekt "Mehrachsig Örtlich" 
 %
 % INPUT:
 % PA   - Ausfallwahrscheinlichkeit
@@ -14,13 +15,13 @@ function ffs = AbsichernBauteilWoehlerlinie_Pfs(PA,n,KRP,f0025)
 % Absichern der Bauteilwoehlerlinie nach FKM-Richtlinie Nichtlinear für Pram
 % Tabelle 2.13
 if abs(PA - 2.3 * 10^(-1)) < 1e-5
-    gamma_M=1.2;
-elseif abs(PA - 10^(-3)) < 1e-5
-    gamma_M=1.2;
-elseif abs(PA - 7.2 * 10^(-5)) < 1e-5
-    gamma_M=1.45;
-elseif abs(PA - 10^(-5)) < 1e-5
     gamma_M=1.7;
+elseif abs(PA - 10^(-3)) < 1e-5
+    gamma_M=3.0;
+elseif abs(PA - 7.2 * 10^(-5)) < 1e-5
+    gamma_M=4.35;
+elseif abs(PA - 10^(-5)) < 1e-5
+    gamma_M=5.25;
 elseif abs(PA - 0.5) < 1e-5 
     gamma_M = 1;
 else

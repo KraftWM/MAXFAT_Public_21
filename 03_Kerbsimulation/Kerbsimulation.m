@@ -111,6 +111,7 @@ classdef Kerbsimulation < handle
 %    Kp        -> Traglastformzahl ( falls Seeger Heuler oder Seeger Beste
 %                 als 1d kerbnäherung für Bauteilfließkurve genommen wird) 
 %    q         -> zum bestimmen der Materialparameter
+%                 optoara = 1 -> q = maximale Spannung
 %                 optpara = 2 -> q = Qutient geometrische Reihe
 %                 optpara = 3 -> q = Anteil plastischer Dehnungen 
 %                                            an gesamtdehnung bei
@@ -129,7 +130,11 @@ classdef Kerbsimulation < handle
 %   ZVAR       -> Zustandsvariablen Materialmodell
 %  EZVAR       -> Zustandsvariablen Strukturmodell
 %   REF        -> Referenzpunkte Inkrementelle Kerbnäherungen
-%
+%   chi        -> Ratchetting Parameter
+%  echi        -> Pseudo Ratchetting Parameter
+% npvhack      -> (bool) true  = NPV wird in SFF nur für Spannungen verwendet
+%                                (default)
+%                        false = NPV wird in SFF komplett verwendet
 %
 %  PROTECTED:
 %   nkana      -> Anzahl Lastkanäle
@@ -220,6 +225,8 @@ classdef Kerbsimulation < handle
       eq {mustBeNumeric} =  0.01;                                          % Parameter je nach Verfahren
       ep_M {mustBeNumeric} = 0.03;                                         % plastische Dehnung nach der ideale plasti herrscht
       eep_M {mustBeNumeric} = 0.03;                                        % plastische Dehnung nach der ideale plasti herrscht
+      chi {mustBeNumeric} = NaN;                                           % Parameter für Ratchetting 
+      echi {mustBeNumeric} = NaN;                                          % Pseudo Parameter für Ratchetting 
       
       % Zusätzliche Bauteilinformationen (Für Strukturfließflächenansätze)
       fk {mustBeNumeric} = NaN;                                            % Werkstofffließkurve
@@ -230,6 +237,9 @@ classdef Kerbsimulation < handle
 	  ZVAR {mustBeNumeric} = NaN;                                          % Zustandsvariablen Materialmodell
 	  EZVAR {mustBeNumeric} = NaN;                                         % Zustandsvariablen Strukturmodell
 	  REF {mustBeNumeric} = NaN;                                           % Referenzpunkte inkrementelle Verfahren 
+
+      % Berücksichtigen der Nichtproportionalen Verfestigung
+      npvhack {mustBeNumericOrLogical} = true;
 
    end % Ende EIGENSCHAFTEN Public 
    
@@ -329,7 +339,7 @@ classdef Kerbsimulation < handle
            obj.epara = obj.bestimmeParameter(obj.verfahren);
        end 
        % ... Grenzwert
-%        obj.maxESigModell = spannungsgrenzwert(obj.material,obj.epara,obj.eM);
+       % obj.maxESigModell = spannungsgrenzwert(obj.material,obj.epara,obj.eM);
 
 
        % ------------------------------------------------------------------
@@ -339,7 +349,7 @@ classdef Kerbsimulation < handle
            obj.para = obj.bestimmeParameter("werkstoff");
        end 
        % ... Grenzwert
-%        obj.maxSigModell = spannungsgrenzwert(obj.material,obj.para,obj.M);       
+       % obj.maxSigModell = spannungsgrenzwert(obj.material,obj.para,obj.M);       
        
        
        % ------------------------------------------------------------------
@@ -555,7 +565,13 @@ classdef Kerbsimulation < handle
                     case 'EZVAR' % ... Zustandsvariablen Strukturmodell
                         obj.EZVAR = varvalue;
                     case 'REF' % ... Referenzpunkte
-                        obj. REF = varvalue;
+                        obj.REF = varvalue;
+                    case 'chi' % ... Referenzpunkte
+                        obj.chi = varvalue;
+                    case 'echi' % ... Referenzpunkte
+                        obj.echi = varvalue;
+                    case 'npvhack'
+                        obj.npvhack = varvalue;
                     otherwise  % ... Warnung bei Eigenschaft nicht erkannt
                         
                         msg = ['Die Eigenschaft ', varname, ' wurde nicht ',...
@@ -660,23 +676,40 @@ classdef Kerbsimulation < handle
             if strcmp(typ,'werkstoff')    
                 if isnan(obj.fk)
                     if strcmp(obj.verfahren,'PseudoStrain')
-                        parameter = ro2paraV2(typ, ...
-                                    obj.E, obj.nu, obj.Kstrich, obj.nstrich,...
-                                    obj.M, obj.material, ...
-                                    obj.optpara,obj.q,obj.ep_M,...
-                                    obj.eindkerb,obj.Kp);
+                        if obj.npvhack
+                            % NPV im Materialmodell ausstellen
+                            parameter = ro2paraV2(typ, ...
+                                        obj.E, obj.nu, obj.Kstrich, obj.nstrich,...
+                                        obj.M, obj.material, ...
+                                        obj.optpara,obj.q,obj.ep_M,...
+                                        obj.eindkerb,obj.Kp,NaN,obj.chi);
+                        else
+                            % mit NP im Materialmodell
+                            parameter = ro2paraV2(typ, ...
+                                        obj.E, obj.nu, obj.Knp, obj.nstrich,...
+                                        obj.M, obj.material, ...
+                                        obj.optpara,obj.q,obj.ep_M,...
+                                        obj.eindkerb,obj.Kp,NaN,obj.chi);
+                        end
                     else
                         parameter = ro2paraV2(typ, ...
                                     obj.E, obj.nu, obj.Knp, obj.nstrich,...
                                     obj.M, obj.material, ...
                                     obj.optpara,obj.q,obj.ep_M,...
-                                    obj.eindkerb,obj.Kp,obj.epara(end));
+                                    obj.eindkerb,obj.Kp,obj.epara(end),obj.chi);
                     end
                 else
-                    parameter = bfk2paraV2(typ,obj.fk, ...
-                                          obj.M, obj.material, ...
-                                          obj.E, obj.nu,...
-                                          obj.optpara,obj.q,obj.ep_M);
+                    if strcmp(obj.verfahren,'PseudoStrain')
+                        parameter = bfk2paraV2(typ,obj.fk, ...
+                                              obj.M, obj.material, ...
+                                              obj.E, obj.nu,...
+                                              obj.optpara,obj.q,obj.ep_M,NaN,obj.chi);
+                    else
+                        parameter = bfk2paraV2(typ,obj.fk, ...
+                                              obj.M, obj.material, ...
+                                              obj.E, obj.nu,...
+                                              obj.optpara,obj.q,obj.ep_M,obj.epara(end),obj.chi);
+                    end
                 end
                 % ... Sonderbehandlung OWT Modell
 %                 if strcmp(obj.material,'OWT')
@@ -690,24 +723,41 @@ classdef Kerbsimulation < handle
                 obj.maxSigModell = spannungsgrenzwert(obj.material,parameter,obj.M);
             % ... Bestimme Strukturparameter
             elseif any(strcmp(typ,validvalue))
-                if strcmp(obj.eindkerb,'selbst') && ~isnan(obj.bfk)
-                    parameter = bfk2paraV2(obj.verfahren,obj.bfk, ...
-                                          obj.eM, obj.material, ...
-                                          obj.E, obj.nu,...
-                                          obj.eoptpara,obj.eq,obj.eep_M);
+                if strcmp(obj.eindkerb,'selbst') && ~any(any(isnan(obj.bfk)))
+                    if strcmp(obj.verfahren,'PseudoStrain')
+                        parameter = bfk2paraV2(obj.verfahren,obj.bfk, ...
+                                              obj.eM, obj.material, ...
+                                              obj.E, obj.nu,...
+                                              obj.eoptpara,obj.eq,obj.eep_M,NaN,obj.echi);
+                    else
+                        parameter = bfk2paraV2(obj.verfahren,obj.bfk, ...
+                                              obj.eM, obj.material, ...
+                                              obj.E, obj.nu,...
+                                              obj.eoptpara,obj.eq,obj.eep_M,obj.para(end),obj.echi);
+                    end
                 else
                     if strcmp(obj.verfahren,'PseudoStrain')
                         parameter = ro2paraV2(obj.verfahren, ...
                                 obj.E, obj.nu, obj.Knp, obj.nstrich,...
                                 obj.eM, obj.material, ...
                                 obj.eoptpara,obj.eq,obj.eep_M,...
-                                obj.eindkerb,obj.Kp);
+                                obj.eindkerb,obj.Kp,NaN,obj.echi);
                     else 
-                        parameter = ro2paraV2(obj.verfahren, ...
-                                obj.E, obj.nu, obj.Kstrich, obj.nstrich,...
-                                obj.eM, obj.material, ...
-                                obj.eoptpara,obj.eq,obj.eep_M,...
-                                obj.eindkerb,obj.Kp,obj.para(end));
+                        if obj.npvhack 
+                            % NPV IM Strukturmodell ausstellen
+                            parameter = ro2paraV2(obj.verfahren, ...
+                                    obj.E, obj.nu, obj.Kstrich, obj.nstrich,...
+                                    obj.eM, obj.material, ...
+                                    obj.eoptpara,obj.eq,obj.eep_M,...
+                                    obj.eindkerb,obj.Kp,obj.para(end),obj.echi);
+                        else
+                            % mit NPV im Strukturmodell
+                            parameter = ro2paraV2(obj.verfahren, ...
+                                    obj.E, obj.nu, obj.Knp, obj.nstrich,...
+                                    obj.eM, obj.material, ...
+                                    obj.eoptpara,obj.eq,obj.eep_M,...
+                                    obj.eindkerb,obj.Kp,obj.para(end),obj.echi);
+                        end
                     end
                 end
                 % ... Sonderbehandlung OWT Modell
@@ -821,7 +871,7 @@ classdef Kerbsimulation < handle
                     if obj.maxSigMises > obj.maxESigModell % spannungsgrenzwert(obj.material,obj.epara,obj.M)
                         % ... Setzte variablen input zum parameter anpassen
                         varinput = cell(1,3);
-                        if isnan(obj.bfk)
+                        if ~strcmp(obj.eindkerb,'selbst') %   isnan(obj.bfk)
                             varinput{1} = obj.Knp;
                             varinput{2} = obj.nstrich;
                         else

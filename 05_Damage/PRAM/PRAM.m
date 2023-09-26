@@ -449,7 +449,7 @@ methods
         end % Ende hcm
         
         % ... Lebensdauer Rechnung 
-        function [DL,SSP,PDam] = lebensdauer(obj,P)
+        function [DL,SSP,PDam] = lebensdauer(obj,P,ndl)
             % Funktion rechnet Lebensdauern aus Schädigungsparametern
             %
             % INPUT:
@@ -457,6 +457,8 @@ methods
             %                  1.Zeile Schwingspiele prim. Schädigungsvariable
             %                  2.Zeile Schädigungsparameter
             %                  3.Zeile Durchläufe
+            % ndl            - Durchläufe der Lastfolge, die Simuliert
+            %                  wurden
             %
             % OUTPUT:
             % DL             - Durchläufe
@@ -472,7 +474,7 @@ methods
             PDam = zeros(2,nP);          % Speicher für Schädigung
             Dsum = 0;                  % Schadenssumme
             Dlast = 0;                 % Schädigung letzter Durchlauf
-            ndl = ceil(max(P(3,:)));   % maximale Anzahl an Durchläufen
+            ndl = min([ndl,ceil(max(P(3,:)))]);   % maximale Anzahl an Durchläufen
             idam = 0;                  % Zeiger auf den Wert an dem Dsum = 1
             ilast = 1;                 % Zeiger auf ersten Wert des letzten Durchlaufs
             for i = 1: nP

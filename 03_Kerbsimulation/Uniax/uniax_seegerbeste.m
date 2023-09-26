@@ -42,7 +42,7 @@ for ii = 1 : length(sig)
         % Spannung ist Gleich 
         esig(ii) = sig(ii);
         % Abspeichern zugehörige Dehnung
-        eeps(ii) = Kp * esig(ii)/(Kp*E);
+        eeps(ii) = esig(ii)/E;
         
     % Elastisch - plastische Iteration 
     else
@@ -86,7 +86,7 @@ for ii = 1 : length(sig)
         % Abspeichern elastische Spannung
         esig(ii) = L;
         % Abspeichern zugehörige elastische Dehnung
-        eeps(ii) = d * Kp * (esig(ii)/(Kp*E) + (esig(ii)/(Kp*Kprime))^(1/nprime));
+        eeps(ii) = esig(ii)/E;%d * Kp * (esig(ii)/(Kp*E) + (esig(ii)/(Kp*Kprime))^(1/nprime));
         
     end % Ende Verzweigung elastische/elastisch plastisch
     
@@ -94,11 +94,12 @@ end % Ende Schleife über Inkremente
 
 % pseudo plastische dehnung
 eepsp = eeps - sig/E;
+eepsp(eepsp<0) = 1e-40;
 
 end % Ende Hauptfunktion
 
 % Hilfsfunktion zielfunktion für seeger beste
-function [f,d] = zielfun(L,sig,omega,E,Kprime,nprime,Kp)
+function [f,d,u] = zielfun(L,sig,omega,E,Kprime,nprime,Kp)
 
     estar = L/(Kp*E) + (L/(Kp*Kprime))^(1/nprime);                         % Hilfsvariable
     fak = L/sig;                                                           % Hilfsvariable

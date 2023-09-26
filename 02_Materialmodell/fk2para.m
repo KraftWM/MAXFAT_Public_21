@@ -24,15 +24,17 @@ ii = 2:length(sig);
 iim1 = 1:length(sig)-1;
 H = zeros(1,M+1);
 H(1:M) = (sig(ii)-sig(iim1))./(epsp(ii)-epsp(iim1));
-
+[H,sig] = checkTangentenModuli(sig,epsp,H,M);
 
 % -------------------------------------------------------------------------
 % c_i und r_i
 ii = 1:length(sig)-1;
 iip1 = 2:length(sig);
 c_i = sqrt(2/3) ./ epsp(2:end);
-r_i = 2/3 .* (H(ii)-H(iip1))./c_i; r_i(r_i < 0) = 1e-40;
-
+r_i = 2/3 .* (H(ii)-H(iip1))./c_i; 
+idx = r_i <= 0;
+r_i(idx) = 1;%1e-40;
+c_i(idx) = 0.1;%0;
 % -------------------------------------------------------------------------
 % zuweisen der Parameter je nach Modell
 switch modell
@@ -48,7 +50,7 @@ switch modell
         para(4) = 0;                                                       % gamma für isotrope Verfestigung
         para(5:4+M) = c_i;                                                 % Parameter c_i
         para(M+5:2*M+4) = r_i;                                             % Parameter r_i
-%         para(M*2+4) = r_i(M)*3/2;
+        para(M*2+4) = r_i(M)*3/2;
         para(2*M+5) = r0;                                                  % Startradius FF
     case 'OhnoWang'
         para = NaN(1,3*M+3);
@@ -137,10 +139,10 @@ switch modell
         para(M*2+3:M*3+2) = chi_i;                                         % Rattcheting
         % NP Verfestigung
         para(M*3+3) = 100;                                                 % gamma    (Standartwert)
-        para(M*3+4) = 0;                                                   % gamma_np
+        para(M*3+4) = 100;                                                 % gamma_np
         para(M*3+5) = 80;                                                  % gamma_a  (Standartwert)
         para(M*3+6) = 50;                                                  % gamma_c  (Standartwert)
-        para(M*3+7) = 0;                                                   % Qnpmax
+        para(M*3+7) = 200;                                                 % Qnpmax
         para(M*3+8) = 0.1;                                                 % eta      (Standartwert)
         para(M*3+9) = 1;                                                   % omega    (Standartwert)
         para(M*3+10) = 5;                                                  % cg       (Standartwert)
@@ -150,4 +152,74 @@ switch modell
         msg = 'Materialmodell nicht impelementiert';
         error(msg);
 end
+end
+
+function [H,sig] = checkTangentenModuli(sig,epsp,H,M)
+    % schaue ob Tangentenmoduli positiv sind
+    if any(H<0)
+        error('Einige Hi sind negativ')
+    end
+    % Schaue ob Tangentenmoduli monoton fallen
+    dH = diff(H);
+    if any(dH>0)
+        % Originale Kurve Speichern
+        sig_orig = sig;
+        H_orig = H;
+        % Rückwärts schauen wann Moduli größer werden
+        % Dabei gilt H(i) = (sig(i+1)-sig(i)/(epsp(i+1)-epsp(i))
+        % H(M+1) = 0
+        while any(dH>0)
+            for i = 1:M
+                runter = 0;
+                if H(i+1)>H(i)
+                    % 1. Setze sig(i+1) nach oben
+                    H_neu = (sig(i+2)-sig(i))/(epsp(i+2)-epsp(i));
+                    H(i) = H_neu;
+                    H(i+1) = H_neu;
+                    sig(i+1) = H_neu *(epsp(i+1)-epsp(i)) + sig(i);
+                    a = abstand(sig,sig_orig,epsp,H,H_orig,M);
+                    % 2. Für alle vorherigen Bereiche                    
+                    for j = i-1:-1:1
+                        if H(j)>H(i) % Runter setzten
+                            % break;
+                            H_neu = (sig(i+2)-sig(j))/(epsp(i+2)-epsp(j));
+                            sig_neu = H_neu * (epsp(j+1:i+1)-epsp(j)) + sig(j); 
+                            a_neu = abstand([sig(1:j),sig_neu,sig(i+2:end)],sig_orig,epsp,...
+                                            [H(1:j),repelem(H,i-j),H(i+2:end)],H_orig,M);
+                            runter = runter + 1;
+                            if a_neu < a % nur Runter Setzten wenn Kurve besser angenähert wird
+                                a = a_neu;
+                                H(j:i+1) = H_neu;
+                                sig(j+1:i+1) = sig_neu;
+                            else
+                                break;
+                            end
+                        else % Hochsetzten
+                            H_neu = (sig(i+2)-sig(j))/(epsp(i+2)-epsp(j));
+                            H(j:i+1) = H_neu;
+                            sig(j+1:i+1) = H_neu * (epsp(j+1:i+1)-epsp(j)) + sig(j); 
+                            a = abstand(sig,sig_orig,epsp,H,H_orig,M);
+                        end
+                    end
+                end          
+            end
+            % Aktuallisiere dH
+            dH = diff(H);
+        end
+    end
+end
+
+function a = abstand(sig,sig_orig,epsp,H,H_orig,M)
+    a = 0;
+    for i = 1:M
+        dH = H_orig(i) - H(i);
+        if dH == 0
+            da = 0;
+        else
+            depsp = epsp(i+1) - epsp(i);
+            dsig = sig_orig(i) - sig(i);
+            da = ( (dH*depsp+dsig)^3-dsig^3 )/(3*dH);
+        end
+        a = a + da;
+    end
 end

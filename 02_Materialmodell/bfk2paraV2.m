@@ -48,14 +48,43 @@ function para = bfk2paraV2(typ,bfk,M,modell,E,nu,verfahren_flag,varargin)
 %                                            Fließbegindd
 %                       varargin{1,2} = ep_M -> plastische dehunung nach
 %                                               der ideale plastizität gilt
-%                       varargin{1,3} = Kstrich -> RamOsg.
-%                       varargin{1,4} = nstrich -> RamOsg.
+% _________________________________________________________________________
+% 
+% variabler Input (feste reihenfolge):
+% q              -> Parameter zum Setzen der Stützstellen
+% ep_M           -> Parameter zum Setzen der Stützstellen, bei
+%                   verfahren_flag = 2 kann irgendein Wert gegeben werden
+% r0             -> Startradius FF
+% chi            -> Rattcheting Parameter
 % -------------------------------------------------------------------------
 % Stand: September 2020
 % Autor: Jan Kraft
 % -------------------------------------------------------------------------
 
-
+% -------------------------------------------------------------------------
+% Variablen Input 
+% ... Erstmal default Werte
+if verfahren_flag == 2 
+    defaultval = {0.333, 0.03,NaN,NaN};
+elseif verfahren_flag == 3
+    defaultval = {0.01, 0.03,NaN,NaN};
+elseif verfahren_flag == 1
+    defaultval = {500, 0.03, NaN,NaN};
+else
+    verfahren_flag = 3;
+    defaultval = {0.333, 0.03, NaN,NaN};
+end
+% ... setze variablen input
+nvarin = size(varargin,2);
+if nvarin > 0
+    for i = 1:nvarin
+        defaultval{i} = varargin{i};
+    end
+end
+q = defaultval{1};
+epM = defaultval{2};
+r0 = defaultval{3};
+chi = defaultval{4};
 
 % -------------------------------------------------------------------------
 % herrauslesen Spannungen und plastische Dehnungen
@@ -67,10 +96,27 @@ numdat = size(sig,1);
 % festlegen Ratchetting Parameter (default werte)
 switch typ
     case 'werkstoff'
-        chi_i = 5 * ones(1,M);                                             % Default werkstoff
+        if isnan(chi)
+            chi_i = 5 * ones(1,M);                                             % Default werkstoff
+        else
+            if length(chi) == M
+                chi_i = chi;
+            else
+                chi_i = chi * ones(1,M);
+            end
+        end
     otherwise
-        chi_i = 50 .* ones(1,M);                                           % Default struckturmodell
+        if isnan(chi)
+            chi_i = 50 .* ones(1,M);                                           % Default struckturmodell
+        else
+            if length(chi) == M
+                chi_i = chi;
+            else
+                chi_i = chi * ones(1,M);
+            end
+        end
 end
+
 
 
 % -------------------------------------------------------------------------
@@ -80,42 +126,48 @@ if verfahren_flag == 1
     
     % zyklische Fließspannung definiert bei 0.01% plastischer Dehnung
     % Festlegend Fließspannung bei ersten wert an dem epsp < 0.0001
-    epspf = 0.0001; % plastische Dehnung an der Fließen definiert wird
+    if strcmp(typ,'PseudoStrain')
+        epspf = 0.00001; % plastische Dehnung an der Fließen definiert wird
+    else
+        epspf = 0.0001; % plastische Dehnung an der Fließen definiert wird
+    end
     weiter = 1;     % Bool bedingung
     iter = 1;       % schleifen zähler
-    while weiter
-        % keine Endlosschleifen
-        if iter > numdat - 1
-            msg = ['zu kleine plastischen Dehnngen in Bauteilfließkurve!',...
-                   ' Parameter können nicht bestimmt werden'];
-            error(msg)
+    if isnan(r0)
+        while weiter
+            % keine Endlosschleifen
+            if iter > numdat - 1
+                msg = ['zu kleine plastischen Dehnngen in Bauteilfließkurve!',...
+                    ' Parameter können nicht bestimmt werden'];
+                error(msg)
+            end
+            % festlegen Fließspannung wenn epspf überschritten wird
+            if epsp(iter) <= epspf && epsp(iter+1) > epspf
+                % Abbruchbedingung
+                weiter = 0;
+                % Fließspannung
+                r0 = sig(iter);
+                % Zurücksetzten für späteren zugriff
+                iter = iter - 1;
+            elseif iter == 1 && epsp(iter) > epspf
+                % Fließspannung
+                r0 = sig(1);
+                % Warnung ausgeben
+                msg = ['Erste plastische Dehnung in Bauteilfließkurve größer als ',...
+                    'festgelegte Grenze (epsp_f = ',num2str(epspf),') für' ,...
+                    'Fließen. Erster Spannungswert wird ', ...
+                    'als Fließspannung übernommen. epsp(1) = ', num2str(epsp(1)), ...
+                    ' Fließspannung sig_f = ', num2str(r0)];
+                warning(msg);
+                % Abbruchbedingung
+                weiter = 0;
+            end
+            iter = iter + 1;
         end
-        % festlegen Fließspannung wenn epspf überschritten wird
-        if epsp(iter) <= epspf && epsp(iter+1) > epspf
-            % Abbruchbedingung
-            weiter = 0;
-            % Fließspannung
-            r0 = sig(iter);
-            % Zurücksetzten für späteren zugriff
-            iter = iter - 1;
-        elseif iter == 1 && epsp(iter) > epspf
-            % Fließspannung
-            r0 = sig(1);
-            % Warnung ausgeben
-            msg = ['Erste plastische Dehnung in Bauteilfließkurve größer als ',...
-                   'festgelegte Grenze (epsp_f = ',num2str(epspf),') für' ,...
-                   'Fließen. Erster Spannungswert wird ', ...
-                   'als Fließspannung übernommen. epsp(1) = ', num2str(epsp(1)), ...
-                   ' Fließspannung sig_f = ', num2str(r0)];
-            warning(msg);
-            % Abbruchbedingung
-            weiter = 0;
-        end
-        iter = iter + 1;
     end
     
     % Grenzwert
-    Rm = varargin{1,1};
+    Rm = q;
 
     % Spannungen und Dehnungen bei Fließbeginn
     sigwerte = zeros(1,M+1);                 % Stützstellen Spannungen
@@ -159,42 +211,44 @@ elseif verfahren_flag == 2
     epspf = 0.0001; % plastische Dehnung an der Fließen definiert wird
     weiter = 1;     % Bool bedingung
     iter = 1;       % schleifen zähler
-    while weiter
-        % keine Endlosschleifen
-        if iter > numdat - 1
-            msg = ['zu kleine plastischen Dehnngen in Bauteilfließkurve!',...
-                   ' Parameter können nicht bestimmt werden'];
-            error(msg)
+    if isnan(r0)
+        while weiter
+            % keine Endlosschleifen
+            if iter > numdat - 1
+                msg = ['zu kleine plastischen Dehnngen in Bauteilfließkurve!',...
+                    ' Parameter können nicht bestimmt werden'];
+                error(msg)
+            end
+            % festlegen Fließspannung wenn epspf überschritten wird
+            if epsp(iter) <= epspf && epsp(iter+1) > epspf
+                % Abbruchbedingung
+                weiter = 0;
+                % Fließspannung
+                r0 = sig(iter);
+                % Zurücksetzten für späteren zugriff
+                iter = iter - 1;
+            elseif iter == 1 && epsp(iter) > epspf
+                % Fließspannung
+                r0 = sig(1);
+                % Warnung ausgeben
+                msg = ['Erste plastische Dehnung in Bauteilfließkurve größer als ',...
+                    'festgelegte Grenze (epsp_f = ',num2str(epspf),') für' ,...
+                    'Fließen. Erster Spannungswert wird ', ...
+                    'als Fließspannung übernommen. epsp(1) = ', num2str(epsp(1)), ...
+                    ' Fließspannung sig_f = ', num2str(r0)];
+                warning(msg);
+                % Abbruchbedingung
+                weiter = 0;
+            end
+            iter = iter + 1;
         end
-        % festlegen Fließspannung wenn epspf überschritten wird
-        if epsp(iter) <= epspf && epsp(iter+1) > epspf
-            % Abbruchbedingung
-            weiter = 0;
-            % Fließspannung
-            r0 = sig(iter);
-            % Zurücksetzten für späteren zugriff
-            iter = iter - 1;
-        elseif iter == 1 && epsp(iter) > epspf
-            % Fließspannung
-            r0 = sig(1);
-            % Warnung ausgeben
-            msg = ['Erste plastische Dehnung in Bauteilfließkurve größer als ',...
-                   'festgelegte Grenze (epsp_f = ',num2str(epspf),') für' ,...
-                   'Fließen. Erster Spannungswert wird ', ...
-                   'als Fließspannung übernommen. epsp(1) = ', num2str(epsp(1)), ...
-                   ' Fließspannung sig_f = ', num2str(r0)];
-            warning(msg);
-            % Abbruchbedingung
-            weiter = 0;
-        end
-        iter = iter + 1;
     end
 
     sigwerte = zeros(1,M+1);                 % Stützstellen Spannungen
     sigwerte(1) = r0;
     epspwerte = zeros(1,M+1);                % Stützstellen plastische Dehnungen
     epspwerte(1) = epsp(iter);
-    q = varargin{1,1};                       % Quotient für geometrische Reihe
+%     q = varargin{1,1};                       % Quotient für geometrische Reihe
     epsp0 = epsp(iter);                      % Alte Stützstelle
     % Schleife für alle Backstresstensoren
     for ii = 1 : M
@@ -227,9 +281,9 @@ elseif verfahren_flag == 2
 elseif verfahren_flag == 3
     % ... Verfahren von Simon
     % plastischer Dehnunsanteil
-    q = varargin{1,1};
+%     q = varargin{1,1};
     % letzter Stützpunkt plastische Dehnungen
-    epM = varargin{1,2};
+%     epM = varargin{1,2};
     % Ramberg Osg. Parameter 
     idx = find(sig < (1-q)*(sig + epsp*E),1,'first'); 
     if isempty(idx)
@@ -238,9 +292,11 @@ elseif verfahren_flag == 3
             error(msg)
     else
         % init andere Stützstellen
-        r0 = sig(idx);
+        if isnan(r0)
+            r0 = sig(idx);
+        end
         sigwerte = zeros(1,M+1);                 % Stützstellen Spannungen
-        sigwerte(1) = sig(idx);
+        sigwerte(1) = r0;%sig(idx);
         epspwerte = zeros(1,M+1);                % Stützstellen plastische Dehnungen
         epspwerte(1) = epsp(idx);
     end

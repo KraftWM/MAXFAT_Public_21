@@ -15,11 +15,11 @@ function [Praj_WS_stuetz,Praj_WSD_stuetz,d,f0025] = Praj_Woehlerlinie_FKM(Rm,wsg
 
 % ... PWL
 if any(wsgruppe == 1) || strcmp(wsgruppe,'Stahl')
-    apz = 10;
-    bpz = 0.826;
+    apz = 1.173;
+    bpz = 1;
     apd = 3.33e-5;
     bpd =  1.55;
-    d = -0.63;
+    d = -0.56;
     f0025 = 0.35;
 elseif any(wsgruppe == 2) || strcmp(wsgruppe,'Stahlguss')
     apz = 230;

@@ -69,11 +69,11 @@ for ii = 1 : length(sig)
     % Abspeichern elastische Spannung
     esig(ii) = L;
     % Abspeichern zugehörige elastische Dehnung
-    eeps(ii) = Kp * (L/(Kp*E) + (L/(Kp*Kprime))^(1/nprime));
+    eeps(ii) = esig(ii)/E;%Kp * (L/(Kp*E) + (L/(Kp*Kprime))^(1/nprime));
     
 end % Ende Schleife über Stützstellen
 
 % pseudo plastische dehnung
 eepsp = eeps - sig/E;
-
+eepsp(eepsp<0) = 1e-40;
 end % Ende Funktion

@@ -61,12 +61,25 @@ mode1 = zeros(1,nDMGs);    % Mode 1 (exx) nicht zählen
 mode2 = zeros(1,nDMGs);    % Mode 2 (gxz) nicht zählen 
 mode3 = zeros(1,nDMGs);    % Mode 3 (gxy) nicht zählen 
 for i = 1:length(DMGs)
-    if any(strcmp(DMGs{i}.Name,{'PZ','PZ_st'}))
+    if any(strcmp(DMGs{i}.Name,{'PZ','PZ_st','PZ_neu'}))
         mode1(i) = 1;
         mode2(i) = 1;
         mode3(i) = 1;
         P{i} = zeros(4, min(ndata,5e5));
-    elseif any(strcmp(DMGs{i}.Name,{'PFS','PFS_var','PFS_st'}))
+    elseif any(strcmp(DMGs{i}.Name,{'PFS_mod'}))
+        % Für Fatemi/Socie in Ebenen psi~=0 wird nicht mit Rainflow sondern
+        % mit Modified Wang Brown gezählt
+        % Speicher für P{i} wird tortzdem initialisiert
+        % -> kein Mode wird Eingeschaltet
+        if abs(psi) < 1e-10
+            if DMGs{i}.cc == 12
+                mode2(i) = 1;
+            elseif DMGs{i}.cc == 10
+                mode3(i) = 1;
+            end
+        end
+        P{i} = zeros(4, min(ndata,5e5));
+    elseif any(strcmp(DMGs{i}.Name,{'PFS_st','PFS','PFS_var'}))
         % Umschalten Fatemi/Socie in psi = 45° auf Mode II
         if psi == 45*pi/180
            DMGs{i}.cc = 12;
@@ -166,7 +179,7 @@ end % End Schleife über alle Umkehrpunkte
 % clear Memory für Dehnungsvorgeschichte im Kurzrissmodell & aussortieren
 % der leeren P-Werte
 for i = 1:length(DMGs)
-    if any(strcmp(DMGs{i}.Name,{'PZ','PZ_st'}))
+    if any(strcmp(DMGs{i}.Name,{'PZ','PZ_st','PZ_neu'}))
         DMGs{i}.exmax = 0;
         DMGs{i}.exmin = 0;
         DMGs{i}.exop_alt = 0;
@@ -263,7 +276,25 @@ while weiter
                             % ... Rissöffnungsdehnung abklingen lassen !!!
                             DMGs{i}.exop_alt =  DMGs{i}.exop_ein + (DMGs{i}.exop_alt - DMGs{i}.exop_ein)...
                                 * exp(-DMGs{i}.FA/DMGs{i}.Q*Pz^DMGs{i}.mJ);
-                            
+                        % Kurzrissmodell neu
+                        case {'PZ_neu'}                           
+                            % ... Unterscheide Moden
+                            if mode == 1
+                                Pz = DMGs{i}.kurzriss_mode1(SubData,In,Jn,Kn);             
+                            elseif mode == 2 
+                                Pz = DMGs{i}.kurzriss_mode23( mode,SubData,In,Jn,Kn);                    
+                            elseif mode == 3                               
+                                Pz = DMGs{i}.kurzriss_mode23( mode,SubData,In,Jn,Kn);                               
+                            end
+                            % ... merken durchlauf am letzten Punkt der Hyst
+                            if Pz >=  DMGs{i}.PZD0 * 0.1
+                                p(i) = p(i) + 1;
+                                P{i}(:,p(i)) = [mode;counter;Pz;Data(13,Khat)];
+                            end
+                            % ... Rissöffnungsdehnung abklingen lassen !!!
+                            DMGs{i}.exop_alt =  DMGs{i}.exop_ein + (DMGs{i}.exop_alt - DMGs{i}.exop_ein)...
+                                * exp(-DMGs{i}.FA/DMGs{i}.Q(mode)*Pz^DMGs{i}.mJ(mode));
+%                             fprintf('%.5f\n',DMGs{i}.exop_alt)
                         % Fatemi/Socie
                         case {'PFS', 'PFS_var','PFS_st'}
                             % ... Nur bewerten wenn Mode richtig is
@@ -276,7 +307,18 @@ while weiter
                                     P{i}(:,p(i)) = [counter;Pfs;Data(13,Khat)];
                                 end
                             end
-                                                        
+                        % Fatemi/Socie mit MWB Methode
+                        case {'PFS_mod'}
+                            % ... Nur bewerten wenn Mode richtig is
+                            if cc == DMGs{i}.cc
+                                % ... berechne Schädigung
+                                Pfs = DMGs{i}.pfs(SubData,In,Jn,Kn);
+                                % ... Merke Zähler, Pfs und Schließzeitpunkt
+                                if Pfs >= DMGs{i}.PD
+                                    p(i) = p(i) + 1;
+                                    P{i}(:,p(i)) = [counter;Pfs;Data(13,Khat);1];
+                                end
+                            end                                
                         % PRAM    
                         case {'PRAM','PRAM_st'}
                             % ... Nur bewerten wenn Mode richtig is

@@ -59,6 +59,7 @@ function para = ro2paraV2(typ,...
 %                      "Seeger Beste"
 % Kp             -> Traglastformzahl für einige 1d Kerbnäherungen (e R)
 % r0             -> Startradius FF
+% chi            -> Rattcheting Parameter
 % _________________________________________________________________________
 % OUTPUT:
 % para            -> Materialparameter des Modells
@@ -74,14 +75,14 @@ function para = ro2paraV2(typ,...
 % Variablen Input 
 % ... Erstmal default Werte
 if verfahren_flag == 2 
-    defaultval = {0.333, 0.03, 'Neuber', 1.001,NaN};
+    defaultval = {0.333, 0.03, 'Neuber', 1.001,NaN,NaN};
 elseif verfahren_flag == 3
-    defaultval = {0.01, 0.03, 'Neuber', 1.001,NaN};
+    defaultval = {0.01, 0.03, 'Neuber', 1.001,NaN,NaN};
 elseif verfahren_flag == 1
-    defaultval = {500, 0.03, 'Neuber', 1.001,NaN};
+    defaultval = {500, 0.03, 'Neuber', 1.001,NaN,NaN};
 else
     verfahren_flag = 3;
-    defaultval = {0.333, 0.03, 'Neuber', 1.001,NaN};
+    defaultval = {0.333, 0.03, 'Neuber', 1.001,NaN,NaN};
 end
 % ... setze variablen input
 nvarin = size(varargin,2);
@@ -95,6 +96,7 @@ epM = defaultval{2};
 ksim1d = defaultval{3}; 
 Kp = defaultval{4}; 
 r0 = defaultval{5};
+chi = defaultval{6};
 
 % -------------------------------------------------------------------------
 % initialisiere lokale variablen
@@ -106,9 +108,25 @@ epsp = NaN(1,M+1);                                                         % pla
 % festlegen Ratchetting Parameter (default werte)
 switch typ
     case 'werkstoff'
-        chi_i = 5 * ones(1,M);                                             % Default werkstoff
+        if isnan(chi)
+            chi_i = 5 * ones(1,M);                                             % Default werkstoff
+        else
+            if length(chi) == M
+                chi_i = chi;
+            else
+                chi_i = chi * ones(1,M);
+            end
+        end
     otherwise
-        chi_i = 50 .* ones(1,M);                                           % Default struckturmodell
+        if isnan(chi)
+            chi_i = 50 .* ones(1,M);                                           % Default struckturmodell
+        else
+            if length(chi) == M
+                chi_i = chi;
+            else
+                chi_i = chi * ones(1,M);
+            end
+        end
 end
 
 % -------------------------------------------------------------------------

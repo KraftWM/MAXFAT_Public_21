@@ -133,9 +133,10 @@ classdef PZ2 < handle
        ce {mustBeNumeric} = 0.25;                                          % Endrisslänge (auf der Oberfläche, Punkt B)
        Gsig {mustBeNumeric} = 0;                                           % 
        Gtau {mustBeNumeric} = 0;                                           % Bezogener Spannungsgradient
-       M_sig {mustBeNumeric} = -1;                                         % Mittelspannungsempfindlichkeit (nach FKM RiLiNiLi aus
+       M_sig {mustBeNumeric} = NaN;                                        % Mittelspannungsempfindlichkeit (nach FKM RiLiNiLi aus
                                                                            % Zugfestigkeit) % !!!!! vlt noch zu modifizieren
-       ators {mustBeNumeric} = 0;                                          % Einfluss torsionsspannung auf rissschließen                           
+       ators {mustBeNumeric} = 0;                                          % Einfluss torsionsspannung auf rissschließen  
+       amitt {mustBeNumeric} = 0;                                          % Einfluss Mittelspannung auf rissschließen  
        sigF {mustBeNumeric} = NaN;                                         % Fließspannung (aus Rm und Rp02)
        tauF {mustBeNumeric} = NaN;                                         % Fließspannung Schub
        mu {mustBeNumeric} = 0.5;                                           % Reibkontakt der Rissufer, Einflus sn
@@ -239,10 +240,12 @@ methods
                         obj.takt = varvalue;
                     case 'ators'
                         obj.ators = varvalue;
+                    case 'amitt'
+                        obj.amitt = varvalue;
                     case 'fwt'
                         obj.fwt = varvalue;
                     case 'tauF'
-                        obj.tauF = tauF;
+                        obj.tauF = varvalue;
                     otherwise
                         msg = ['Variable ', varname, ' nicht erkannt'];
                         warning(msg)                        
@@ -881,18 +884,7 @@ methods
         
         sx_min = min(DATA(1,I:K));
                
-        % -----------------------------------------------------------------
-        % obere von Mises Vergleichsspannung und obere wirksame 
-        % Vergleichsspannung beide mit dem Vorzeichen der größten
-        % Normalspannung
-        [sv_vz, sw_vz] = obj.mises_vorzeichen(DATA,imax);
-        
-        
-        % -----------------------------------------------------------------
-        % Rissöffnungsspannung bestimmen
-        [sxop] = obj.newman_max(sx_max,sx_min,sw_vz,sv_vz,obj.sigF,obj.M_sig,obj.ators);
-        
-        
+              
         % -------------------------------------------------------------------------
         % Indizes der Hysterese festlegen (unterscheide Auf- und Absteigende Äste)
         % und stehender/hängender Hysteresen
@@ -909,6 +901,18 @@ methods
             iu_auf = J;
             io_auf = K;
         end
+
+        % -----------------------------------------------------------------
+        % obere von Mises Vergleichsspannung und obere wirksame 
+        % Vergleichsspannung beide mit dem Vorzeichen der größten
+        % Normalspannung
+        [sv_vz, sw_vz] = obj.mises_vorzeichen(DATA,imax);
+%         [sv_vz, sw_vz] = obj.mises_vorzeichen(DATA,io_ab);
+        
+        % -----------------------------------------------------------------
+        % Rissöffnungsspannung bestimmen
+        [sxop] = obj.newman_max(sx_max,sx_min,sw_vz,sv_vz,obj.sigF,obj.M_sig,obj.ators,obj.amitt);
+        
         
         
         % -------------------------------------------------------------------------
@@ -965,6 +969,10 @@ methods
         % Rissschließdehnung
         
         excl = exop;
+        % ... Abfangen excl außerhalb der Hysterese
+        if excl < exu
+            excl = exu;
+        end
         
         % -------------------------------------------------------------------------
         % Rissschließpunkt und -spannung am absteigenden Ast suchen
@@ -978,7 +986,7 @@ methods
         % pause(5)
         % -------------------------------------------------------------------------
         % Integration von DWxeff am absteigenden Ast
-        
+%         icl = iu_ab; sxcl = sx_min; excl = DATA(7,iu_ab);
         Wxeff = obj.verzerrungsenergie(DATA,1,7,io_ab,icl);
         
         % Korrektur der Verzerrungsenergie, da über den exakten (aus diskreten
@@ -994,6 +1002,10 @@ methods
         
         P = 2*pi*Wxeff*obj.Y1A0^2;
         % P = 6.2632*Wxeff*Y1A0^2;
+
+%         if P > 0
+%             fprintf('         %.3f\n',sxop)
+%         end
         
     end % Ende Kurzrissmode I
     
@@ -1092,10 +1104,8 @@ methods
             end
             
         end
-        
         % -------------------------------------------------------------------------
         % Effektive Verzerrungsenergie
-        
         % auf aufsteigendem und absteigendem Ast und dann Mittelwert bilden
         W1 = obj.verzerrungsenergie(DATA,zs,ze,I,J);
         W1 = max([0,W1]);
@@ -1120,7 +1130,7 @@ methods
     end % Ende Kurzrissmode II & III
     
     % ... Lebensdauerrechnung
-    function [DL,SSP,PDam] = lebensdauer(obj,P,varargin)
+    function [DL,SSP,PDam] = lebensdauer(obj,P,ndl,varargin)
         % Funktion rechnet Lebensdauern aus Schädigungsparametern
         %
         % INPUT:
@@ -1129,6 +1139,8 @@ methods
         %                      (2.Zeile) -> gezählte Schwingspiele
         %                      (3.Zeile) -> PZ Parameter
         %                      (4.Zeile) -> Durchlauf in dem Ssp gezählt wurde
+        % ndl            - Durchläufe der Lastfolge, die Simuliert
+        %                  wurden
         % varargin          - Variabler input für output datei
         %
         % OUTPUT:
@@ -1140,7 +1152,7 @@ methods
         %__________________________________________________________________
         % -----------------------------------------------------------------
         % Durchläufe
-        ndl = ceil(max(P(4,:)));              % Anzahl Durchläufe
+%         ndl = ceil(max(P(4,:)));              % Anzahl Durchläufe
         PDam = zeros(2,size(P,2));            % Speicher für Schädigung
 
         % -----------------------------------------------------------------
@@ -1151,10 +1163,10 @@ methods
         Dsum = 0;        % Schadenssumme
         DsumModes = zeros(3,1); % Schadenssumme der einzelnen Moden
         azc = ai/ci;     % Verhältniss Risslängen a/c
-        
+
         % -------------------------------------------------------------------------
         % Organisiere Output
-        if nargin == 3
+        if nargin == 4
             % ... output erstellen
             outopt = 1;
             % ... Speicherzähler 
@@ -1218,6 +1230,15 @@ methods
             
             % ... inkrement i
             i = i + 1;
+
+            % ... Abfangen im letzten Durchlauf schließt kein SSp
+            if i > size(P,2)
+                % ... Zurücksetzten i = startwert des letzten DL in dem
+                % sich noch ein Schwingspiel schließt
+                i = find( P(4,:) >= ceil( max(P(4,:)) )-1,1 );
+                % ... Schleife verlassen
+                break;
+            end
             
         end % Ende Schleife über alle PZ Werte
         
@@ -1812,6 +1833,20 @@ methods (Static)
         sxy = DATA(4,imax);
         syz = DATA(5,imax);
         sxz = DATA(6,imax);
+
+%         sxx = 0.5*( max(DATA(1,:)) - min(DATA(1,:)) );
+%         syy = 0.5*( max(DATA(2,:)) - min(DATA(1,:)) );
+%         szz = 0.5*( max(DATA(3,:)) - min(DATA(1,:)) );
+%         sxy = 0.5*( max(DATA(4,:)) - min(DATA(1,:)) );
+%         syz = 0.5*( max(DATA(5,:)) - min(DATA(1,:)) );
+%         sxz = 0.5*( max(DATA(6,:)) - min(DATA(1,:)) );
+
+%         sxx = max(DATA(1,:));
+%         syy = max(DATA(2,:));
+%         szz = max(DATA(3,:));
+%         sxy = max(DATA(4,:));
+%         syz = max(DATA(5,:));
+%         sxz = max(DATA(6,:));
         
         % von mises Vergleichsspannung und in der kritischen Ebene wirksame
         % Vergleichsspannung (mit vorzeichen aus normalspannung)
@@ -1827,7 +1862,7 @@ methods (Static)
     end % Ende vorzeichenbehaftete Vergleichspannung
     
     % ... Rissöffnungsspannung
-    function [sxop] = newman_max(sxo,sxu,sw,sv,sf,M_sig,ators)
+    function [sxop] = newman_max(sxo,sxu,sw,sv,sf,M_sig,ators,Amitt)
         % Newman Verfahren zum bestimmen der Rissöffnungsspannung, für mehraxiale
         % Lasten angepasst von Döring
         %
@@ -1842,6 +1877,8 @@ methods (Static)
         %      astors -> Werkstoffparameter zur ermittlung der
         %                Schubspannungsempfindlichkeit
         %                (nach Vorschlag Hertl = 0 gesetzt)
+        %      Amitt   -> Mittelspannungseinfluss auf Rissöffnung
+        %                (wird über Msig gesteuert falls Msig gegeben ist)
         %
         % OUTPUT:
         %    sxop    -> Normalspannung bei der Riss geöffnet ist
@@ -1864,15 +1901,15 @@ methods (Static)
             end
             
             % Mittelspannungseinfluss (wie in FKM bei PJ)
-            if M_sig < 0
-                amitt = 0;
-            else
+            if M_sig > 0
                 sxm = (sxo+sxu)/2;
                 if sxm <= 1e-3 % eigentlich < 0, aber Toleranz
                     amitt = 0.4-M_sig/4;
                 else
                     amitt = 0.47 -(1-1.5*M_sig)*(1+R)^(1+R+M_sig);
                 end
+            else
+                amitt = Amitt;
             end
             
             
@@ -1958,7 +1995,10 @@ methods (Static)
             end
             
             % lineare Interpolation der öffnungsdehnung
-            if DATA(1,iop) - DATA(1,iop-1) ~= 0
+            if iop == io && DATA(1,iop) < sxop % Abfangen Bug keine Öffnungsdehnung gefunden -> Riss als offen betrachten
+                exop = DATA(7,iu);
+                iop = iu;
+            elseif DATA(1,iop) - DATA(1,iop-1) ~= 0
                 exop = (DATA(7,iop) - DATA(7,iop-1))/(DATA(1,iop) - DATA(1,iop-1)) ...
                     * (sxop - DATA(1,iop-1)) + DATA(7,iop-1);
             else
@@ -2021,6 +2061,7 @@ methods (Static)
                 (excl - DATA(7,icl-1)) + DATA(1,icl-1);
             
         end
+                
     end % Ende Schließspannung
     
     % ... berechne Verzerrungsenergie
